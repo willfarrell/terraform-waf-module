@@ -33,14 +33,14 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
   }
 
   // Breaks ACL :( TODO fix, manual attach
-  //  rules {
-  //    action {
-  //      type = "BLOCK"
-  //    }
-  //
-  //    priority = 2
-  //    rule_id  = "${aws_waf_rate_based_rule.wafHTTPFloodRule.id}"
-  //  }
+  rules {
+    action {
+      type = "BLOCK"
+    }
+
+    priority = 2
+    rule_id  = "${aws_waf_rate_based_rule.wafHTTPFloodRule.id}"
+  }
 
   rules {
     action {
@@ -164,14 +164,14 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
   }
 
   // Breaks ACL :( TODO fix, manual attach
-  //  rule {
-  //    action {
-  //      type = "BLOCK"
-  //    }
-  //
-  //    priority = 2
-  //    rule_id  = "${aws_wafregional_rate_based_rule.wafHTTPFloodRule.id}"
-  //  }
+  rule {
+    action {
+      type = "BLOCK"
+    }
+
+    priority = 2
+    rule_id  = "${aws_wafregional_rate_based_rule.wafHTTPFloodRule.id}"
+  }
 
   rule {
     action {

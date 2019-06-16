@@ -42,12 +42,17 @@ resource "aws_ssm_parameter" "bad-bot" {
 resource "aws_waf_ipset" "white" {
   name = "${var.name}-override-white-ipset"
 }
+
+resource "aws_wafregional_ipset" "white" {
+  name = "${var.name}-override-white-ipset"
+}
+
 ```
 
 ## Input
 - **name:** application name
 - **defaultAction:** Firewall permission. Set to `ALLOW` for the public to gain access [Default: DENY]
-- **ip{Admin,White,Black}ListId:** ip lists on who can and cannot access the endpoint [Default: empty ipset]
+- **ip{Admin,White}listId:** ip lists on who can and cannot access the endpoint [Default: empty ipset]
 
 See `variables.tf` for extended list of OWASP inputs that can be configured.
 
@@ -55,9 +60,7 @@ See `variables.tf` for extended list of OWASP inputs that can be configured.
 - **id:** aws_waf_web_acl id
 
 ## TODO
-- [ ] Easier ip list management (See CRC module)
-- [ ] Port of https://aws.amazon.com/solutions/aws-waf-security-automations/
-- [ ] serverless honeypot
+- [ ] Easier ip list management 
 - [ ] Bug: terraform unable to att raterule to acl - add manually as workaround
 
 
