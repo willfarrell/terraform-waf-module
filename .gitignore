@@ -7,3 +7,16 @@
 
 # .tfvars files
 *.tfvars
+
+*.zip
+!lambda/reputation-list/archive.zip
+
+# nodejs
+node_modules
+
+# IDE
+.idea
+*.iml
+
+# OS
+.DS_Store
