@@ -29,7 +29,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     }
 
     priority = 1
-    rule_id  = aws_waf_rule.wafBlacklistRule.id
+    rule_id  = aws_waf_rule.wafBlacklistRule[0].id
   }
 
   // Breaks ACL :( TODO fix, manual attach
@@ -39,7 +39,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     }
 
     priority = 2
-    rule_id  = "${aws_waf_rate_based_rule.wafHTTPFloodRule.id}"
+    rule_id  = aws_waf_rate_based_rule.wafHTTPFloodRule[0].id
   }
 
   rules {
@@ -48,7 +48,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     }
 
     priority = 3
-    rule_id  = aws_waf_rule.wafSizeRestrictionRule.id
+    rule_id  = aws_waf_rule.wafSizeRestrictionRule[0].id
   }
 
   rules {
@@ -57,7 +57,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     }
 
     priority = 4
-    rule_id  = aws_waf_rule.wafAuthTokenRule.id
+    rule_id  = aws_waf_rule.wafAuthTokenRule[0].id
   }
 
   rules {
@@ -66,7 +66,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     }
 
     priority = 5
-    rule_id  = aws_waf_rule.wafSQLInjectionRule.id
+    rule_id  = aws_waf_rule.wafSQLInjectionRule[0].id
   }
 
   rules {
@@ -75,7 +75,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     }
 
     priority = 6
-    rule_id  = aws_waf_rule.wafXSSRule.id
+    rule_id  = aws_waf_rule.wafXSSRule[0].id
   }
 
   rules {
@@ -84,7 +84,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     }
 
     priority = 7
-    rule_id  = aws_waf_rule.wafPathsRule.id
+    rule_id  = aws_waf_rule.wafPathsRule[0].id
   }
 
   rules {
@@ -93,7 +93,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     }
 
     priority = 8
-    rule_id  = aws_waf_rule.wafCSRFRule.id
+    rule_id  = aws_waf_rule.wafCSRFRule[0].id
   }
 
   //  rules {
@@ -102,7 +102,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
   //    }
   //
   //    priority = 9
-  //    rule_id  = "${aws_waf_rule.wafServerSideIncludeRule.id}"
+  //    rule_id  = aws_waf_rule.wafServerSideIncludeRule[0].id
   //  }
 
   //  rules {
@@ -111,7 +111,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
   //    }
   //
   //    priority = 10
-  //    rule_id  = "${aws_waf_rule.wafAdminAccessRule.id}"
+  //    rule_id  = "aws_waf_rule.wafAdminAccessRule[0].id
   //  }
 
   rules {
@@ -120,7 +120,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     }
 
     priority = 10
-    rule_id  = aws_waf_rule.wafWhitelistRule.id
+    rule_id  = aws_waf_rule.wafWhitelistRule[0].id
   }
 
   logging_configuration {
@@ -160,7 +160,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     }
 
     priority = 1
-    rule_id  = aws_wafregional_rule.wafBlacklistRule.id
+    rule_id  = aws_wafregional_rule.wafBlacklistRule[0].id
   }
 
   // Breaks ACL :( TODO fix, manual attach
@@ -170,7 +170,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     }
 
     priority = 2
-    rule_id  = "${aws_wafregional_rate_based_rule.wafHTTPFloodRule.id}"
+    rule_id  = aws_wafregional_rate_based_rule.wafHTTPFloodRule[0].id
   }
 
   rule {
@@ -179,7 +179,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     }
 
     priority = 3
-    rule_id  = aws_wafregional_rule.wafSizeRestrictionRule.id
+    rule_id  = aws_wafregional_rule.wafSizeRestrictionRule[0].id
   }
 
   rule {
@@ -188,7 +188,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     }
 
     priority = 4
-    rule_id  = aws_waf_rule.wafAuthTokenRule.id
+    rule_id  = aws_waf_rule.wafAuthTokenRule[0].id
   }
 
   rule {
@@ -197,7 +197,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     }
 
     priority = 5
-    rule_id  = aws_wafregional_rule.wafSQLInjectionRule.id
+    rule_id  = aws_wafregional_rule.wafSQLInjectionRule[0].id
   }
 
   rule {
@@ -206,7 +206,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     }
 
     priority = 6
-    rule_id  = aws_wafregional_rule.wafXSSRule.id
+    rule_id  = aws_wafregional_rule.wafXSSRule[0].id
   }
 
   rule {
@@ -215,7 +215,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     }
 
     priority = 7
-    rule_id  = aws_wafregional_rule.wafPathsRule.id
+    rule_id  = aws_wafregional_rule.wafPathsRule[0].id
   }
 
   rule {
@@ -224,7 +224,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     }
 
     priority = 8
-    rule_id  = aws_wafregional_rule.wafCSRFRule.id
+    rule_id  = aws_wafregional_rule.wafCSRFRule[0].id
   }
 
   //  rule {
@@ -233,7 +233,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
   //    }
   //
   //    priority = 9
-  //    rule_id  = "${aws_wafregional_rule.wafServerSideIncludeRule.id}"
+  //    rule_id  = "${aws_wafregional_rule.wafServerSideIncludeRule[0].id}"
   //  }
 
   //  rule {
@@ -242,7 +242,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
   //    }
   //
   //    priority = 10
-  //    rule_id  = "${aws_wafregional_rule.wafAdminAccessRule.id}"
+  //    rule_id  = "${aws_wafregional_rule.wafAdminAccessRule[0].id}"
   //  }
 
   rule {
@@ -251,7 +251,7 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     }
 
     priority = 10
-    rule_id  = aws_wafregional_rule.wafWhitelistRule.id
+    rule_id  = aws_wafregional_rule.wafWhitelistRule[0].id
   }
 
   logging_configuration {

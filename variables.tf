@@ -5,7 +5,7 @@ variable "name" {
 
 variable "type" {
   type    = string
-  default = ""
+  default = "edge"
 }
 
 # IPs

@@ -46,7 +46,7 @@ resource "aws_iam_policy" "reputation-list" {
           "waf:UpdateIPSet"
       ],
       "Resource": [
-          "${aws_waf_ipset.reputation-list.arn}"
+          "${var.type == "regional" ? aws_wafregional_ipset.reputation-list[0].arn : aws_waf_ipset.reputation-list[0].arn}"
       ],
       "Effect": "Allow"
     },
@@ -113,10 +113,9 @@ resource "aws_cloudwatch_event_target" "reputation-list" {
     {  "url":"https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt" }
   ],
   "region": "${local.region}",
-  "ipSetIds": [ "${aws_waf_ipset.reputation-list.id}" ]
+  "ipSetIds": [ "${var.type == "regional" ? aws_wafregional_ipset.reputation-list[0].id : aws_waf_ipset.reputation-list[0].id}" ]
 }
 JSON
-
 }
 
 resource "aws_lambda_permission" "reputation-list" {

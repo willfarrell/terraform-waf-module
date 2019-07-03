@@ -6,9 +6,9 @@ To be used with CloudFront, ALB, API Gateway.
 ### Module
 ```hcl-terraform
 module "waf" {
-  source        = "git@github.com:willfarrell/terraform-waf-module"
+  source        = "git@github.com:willfarrell/terraform-waf-module?ref=v0.0.1"
   type          = "regional"
-  name          = "${var.env}ApplicationName"
+  name          = "${local.workspace["name"]}"
   defaultAction = "${var.defaultAction}"
 
   ipAdminListId = "${aws_waf_ipset.admin.id}"
@@ -50,6 +50,7 @@ resource "aws_wafregional_ipset" "white" {
 ```
 
 ## Input
+- **type:** Type of WAF. `regional` or `edge`. [Default: `edge`]
 - **name:** application name
 - **defaultAction:** Firewall permission. Set to `ALLOW` for the public to gain access [Default: DENY]
 - **ip{Admin,White}listId:** ip lists on who can and cannot access the endpoint [Default: empty ipset]
@@ -62,6 +63,7 @@ See `variables.tf` for extended list of OWASP inputs that can be configured.
 ## TODO
 - [ ] Easier ip list management 
 - [ ] Bug: terraform unable to att raterule to acl - add manually as workaround
+- [ ] Add in to toggle for each rule (max 10)
 
 
 ## Sources
