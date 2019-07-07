@@ -1,18 +1,9 @@
 resource "aws_waf_web_acl" "wafACL" {
   count = var.type != "regional" ? 1 : 0
   depends_on = [
-    aws_waf_rate_based_rule.wafHTTPFloodRule,
-    aws_waf_rule.wafSQLInjectionRule,
-    aws_waf_rule.wafXSSRule,
-    aws_waf_rule.wafAdminAccessRule,
-    aws_waf_rule.wafAuthTokenRule,
-    aws_waf_rule.wafCSRFRule,
-    aws_waf_rule.wafPathsRule,
-    aws_waf_rule.wafServerSideIncludeRule,
-    aws_waf_rule.wafBlacklistRule,
+    aws_waf_rule_group.wafBlacklistRuleGroup,
+    aws_waf_rule_group.wafOWASPRuleGroup,
     aws_waf_rule.wafWhitelistRule,
-    aws_waf_rule.wafServerSideIncludeRule,
-    aws_waf_rule.wafAdminAccessRule,
   ]
 
   name        = "${local.name}wafACL"
@@ -22,106 +13,30 @@ resource "aws_waf_web_acl" "wafACL" {
     type = var.defaultAction
   }
 
-  # Max 10 Rules - https://docs.aws.amazon.com/waf/latest/developerguide/limits.html
   rules {
-    action {
-      type = "BLOCK"
-    }
-
     priority = 1
-    rule_id  = aws_waf_rule.wafBlacklistRule[0].id
-  }
-
-  // Breaks ACL :( TODO fix, manual attach
-  // WAF ACL: WAFNonexistentItemException: The referenced item does not exist.
-//  rules {
-//    action {
-//      type = "BLOCK"
-//    }
-//
-//    priority = 2
-//    rule_id  = aws_waf_rate_based_rule.wafHTTPFloodRule[0].id
-//  }
-
-  rules {
-    action {
-      type = "BLOCK"
+    type = "GROUP"
+    rule_id = aws_waf_rule_group.wafBlacklistRuleGroup[0].id
+    override_action {
+      type = "NONE"
     }
-
-    priority = 3
-    rule_id  = aws_waf_rule.wafSizeRestrictionRule[0].id
   }
 
   rules {
-    action {
-      type = "BLOCK"
+    priority = 2
+    type = "GROUP"
+    rule_id = aws_waf_rule_group.wafOWASPRuleGroup[0].id
+    override_action {
+      type = "NONE"
     }
-
-    priority = 4
-    rule_id  = aws_waf_rule.wafAuthTokenRule[0].id
   }
 
   rules {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 5
-    rule_id  = aws_waf_rule.wafSQLInjectionRule[0].id
-  }
-
-  rules {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 6
-    rule_id  = aws_waf_rule.wafXSSRule[0].id
-  }
-
-  rules {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 7
-    rule_id  = aws_waf_rule.wafPathsRule[0].id
-  }
-
-  rules {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 8
-    rule_id  = aws_waf_rule.wafCSRFRule[0].id
-  }
-
-  //  rules {
-  //    action {
-  //      type = "BLOCK"
-  //    }
-  //
-  //    priority = 9
-  //    rule_id  = aws_waf_rule.wafServerSideIncludeRule[0].id
-  //  }
-
-  //  rules {
-  //    action {
-  //      type = "BLOCK"
-  //    }
-  //
-  //    priority = 10
-  //    rule_id  = "aws_waf_rule.wafAdminAccessRule[0].id
-  //  }
-
-  rules {
+    priority = 10
+    rule_id  = aws_waf_rule.wafWhitelistRule[0].id
     action {
       type = "ALLOW"
     }
-
-    priority = 10
-    rule_id  = aws_waf_rule.wafWhitelistRule[0].id
   }
 
   logging_configuration {
@@ -131,21 +46,14 @@ resource "aws_waf_web_acl" "wafACL" {
   }
 }
 
+
+
 resource "aws_wafregional_web_acl" "wafACL" {
   count = var.type == "regional" ? 1 : 0
   depends_on = [
-    aws_wafregional_rate_based_rule.wafHTTPFloodRule,
-    aws_wafregional_rule.wafSQLInjectionRule,
-    aws_wafregional_rule.wafXSSRule,
-    aws_wafregional_rule.wafAdminAccessRule,
-    aws_wafregional_rule.wafAuthTokenRule,
-    aws_wafregional_rule.wafCSRFRule,
-    aws_wafregional_rule.wafPathsRule,
-    aws_wafregional_rule.wafServerSideIncludeRule,
-    aws_wafregional_rule.wafBlacklistRule,
+    aws_wafregional_rule_group.wafBlacklistRuleGroup,
+    aws_wafregional_rule_group.wafOWASPRuleGroup,
     aws_wafregional_rule.wafWhitelistRule,
-    aws_wafregional_rule.wafServerSideIncludeRule,
-    aws_wafregional_rule.wafAdminAccessRule,
   ]
 
   name        = "${local.name}wafRegionalACL"
@@ -156,104 +64,29 @@ resource "aws_wafregional_web_acl" "wafACL" {
   }
 
   rule {
-    action {
-      type = "BLOCK"
-    }
-
     priority = 1
-    rule_id  = aws_wafregional_rule.wafBlacklistRule[0].id
-  }
-
-  // Breaks ACL :( TODO fix, manual attach
-  // WAF ACL: WAFNonexistentItemException: The referenced item does not exist.
-//  rule {
-//    action {
-//      type = "BLOCK"
-//    }
-//
-//    priority = 2
-//    rule_id  = aws_wafregional_rate_based_rule.wafHTTPFloodRule[0].id
-//  }
-
-  rule {
-    action {
-      type = "BLOCK"
+    type = "GROUP"
+    rule_id = aws_wafregional_rule_group.wafBlacklistRuleGroup[0].id
+    override_action {
+      type = "NONE"
     }
-
-    priority = 3
-    rule_id  = aws_wafregional_rule.wafSizeRestrictionRule[0].id
   }
 
   rule {
-    action {
-      type = "BLOCK"
+    priority = 2
+    type = "GROUP"
+    rule_id = aws_wafregional_rule_group.wafOWASPRuleGroup[0].id
+    override_action {
+      type = "NONE"
     }
-
-    priority = 4
-    rule_id  = aws_waf_rule.wafAuthTokenRule[0].id
   }
 
   rule {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 5
-    rule_id  = aws_wafregional_rule.wafSQLInjectionRule[0].id
-  }
-
-  rule {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 6
-    rule_id  = aws_wafregional_rule.wafXSSRule[0].id
-  }
-
-  rule {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 7
-    rule_id  = aws_wafregional_rule.wafPathsRule[0].id
-  }
-
-  rule {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 8
-    rule_id  = aws_wafregional_rule.wafCSRFRule[0].id
-  }
-
-  //  rule {
-  //    action {
-  //      type = "BLOCK"
-  //    }
-  //
-  //    priority = 9
-  //    rule_id  = "${aws_wafregional_rule.wafServerSideIncludeRule[0].id}"
-  //  }
-
-  //  rule {
-  //    action {
-  //      type = "BLOCK"
-  //    }
-  //
-  //    priority = 10
-  //    rule_id  = "${aws_wafregional_rule.wafAdminAccessRule[0].id}"
-  //  }
-
-  rule {
+    priority = 10
+    rule_id  = aws_wafregional_rule.wafWhitelistRule[0].id
     action {
       type = "ALLOW"
     }
-
-    priority = 10
-    rule_id  = aws_wafregional_rule.wafWhitelistRule[0].id
   }
 
   logging_configuration {

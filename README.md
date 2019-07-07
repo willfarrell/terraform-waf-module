@@ -60,6 +60,31 @@ See `variables.tf` for extended list of OWASP inputs that can be configured.
 ## Output
 - **id:** aws_waf_web_acl id
 
+## Rules
+
+```bash
+ACL
+|- Blacklist Group
+|  |- Bad Bot Rule
+|  |- Blacklist Rule
+|  |- HTTP Flood Rule           # ** Requires Manual Enabling **
+|  |- Reputation List Rule
+|  |- Scanner Probes Rule
+|- OWASP Group
+|  |- Admin Url Rule
+|  |- Auth Token Rule
+|  |- CSRF Rule
+|  |- Paths Rule
+|  |- Server Side Include Rule
+|  |- Size Restriction Rule
+|  |- SQL Injection Rule
+|  |- XSS Rule
+|- Whitelist Rule
+
+
+```
+
+
 ## TODO
 - [ ] Easier ip list management 
 - [ ] Bug: terraform unable to att raterule to acl - add manually as workaround
