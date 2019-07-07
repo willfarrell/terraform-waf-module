@@ -52,8 +52,8 @@ resource "aws_wafregional_rule" "wafAdminAccessRule" {
   count      = var.type == "regional" ? 1 : 0
   depends_on = [aws_wafregional_byte_match_set.wafAdminUrlStringSet]
 
-  name        = "${local.name}wafAdminAccessRule"
-  metric_name = "${local.name}wafAdminAccessRule"
+  name        = "${local.name}wafRegionalAdminAccessRule"
+  metric_name = "${local.name}wafRegionalAdminAccessRule"
 
   predicate {
     data_id = aws_wafregional_byte_match_set.wafAdminUrlStringSet[0].id
@@ -70,12 +70,12 @@ resource "aws_wafregional_rule" "wafAdminAccessRule" {
 
 resource "aws_wafregional_ipset" "adminlist" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${var.name}-adminlist-ipset"
+  name  = "${var.name}-adminlist-regional-ipset"
 }
 
 resource "aws_wafregional_byte_match_set" "wafAdminUrlStringSet" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${local.name}wafAdminAccessRuleSet"
+  name  = "${local.name}wafRegionalAdminAccessRuleSet"
 
   // TODO N/A
   byte_match_tuples {

@@ -1,4 +1,4 @@
-resource "aws_waf_web_acl" "wafOwaspACL" {
+resource "aws_waf_web_acl" "wafACL" {
   count = var.type != "regional" ? 1 : 0
   depends_on = [
     aws_waf_rate_based_rule.wafHTTPFloodRule,
@@ -15,8 +15,8 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
     aws_waf_rule.wafAdminAccessRule,
   ]
 
-  name        = "${local.name}wafOwaspACL"
-  metric_name = "${local.name}wafOwaspACL"
+  name        = "${local.name}wafACL"
+  metric_name = "${local.name}wafACL"
 
   default_action {
     type = var.defaultAction
@@ -33,14 +33,15 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
   }
 
   // Breaks ACL :( TODO fix, manual attach
-  rules {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 2
-    rule_id  = aws_waf_rate_based_rule.wafHTTPFloodRule[0].id
-  }
+  // WAF ACL: WAFNonexistentItemException: The referenced item does not exist.
+//  rules {
+//    action {
+//      type = "BLOCK"
+//    }
+//
+//    priority = 2
+//    rule_id  = aws_waf_rate_based_rule.wafHTTPFloodRule[0].id
+//  }
 
   rules {
     action {
@@ -130,7 +131,7 @@ resource "aws_waf_web_acl" "wafOwaspACL" {
   }
 }
 
-resource "aws_wafregional_web_acl" "wafrOwaspACL" {
+resource "aws_wafregional_web_acl" "wafACL" {
   count = var.type == "regional" ? 1 : 0
   depends_on = [
     aws_wafregional_rate_based_rule.wafHTTPFloodRule,
@@ -147,8 +148,8 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
     aws_wafregional_rule.wafAdminAccessRule,
   ]
 
-  name        = "${local.name}wafrOwaspACL"
-  metric_name = "${local.name}wafrOwaspACL"
+  name        = "${local.name}wafRegionalACL"
+  metric_name = "${local.name}wafRegionalACL"
 
   default_action {
     type = var.defaultAction
@@ -164,14 +165,15 @@ resource "aws_wafregional_web_acl" "wafrOwaspACL" {
   }
 
   // Breaks ACL :( TODO fix, manual attach
-  rule {
-    action {
-      type = "BLOCK"
-    }
-
-    priority = 2
-    rule_id  = aws_wafregional_rate_based_rule.wafHTTPFloodRule[0].id
-  }
+  // WAF ACL: WAFNonexistentItemException: The referenced item does not exist.
+//  rule {
+//    action {
+//      type = "BLOCK"
+//    }
+//
+//    priority = 2
+//    rule_id  = aws_wafregional_rate_based_rule.wafHTTPFloodRule[0].id
+//  }
 
   rule {
     action {

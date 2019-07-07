@@ -63,8 +63,8 @@ resource "aws_wafregional_rule" "wafSizeRestrictionRule" {
   count      = var.type == "regional" ? 1 : 0
   depends_on = [aws_wafregional_size_constraint_set.wafSizeRestrictionSet]
 
-  name        = "${local.name}wafSizeRestrictionRule"
-  metric_name = "${local.name}wafSizeRestrictionRule"
+  name        = "${local.name}wafRegionalSizeRestrictionRule"
+  metric_name = "${local.name}wafRegionalSizeRestrictionRule"
 
   predicate {
     data_id = aws_wafregional_size_constraint_set.wafSizeRestrictionSet[0].id
@@ -75,7 +75,7 @@ resource "aws_wafregional_rule" "wafSizeRestrictionRule" {
 
 resource "aws_wafregional_size_constraint_set" "wafSizeRestrictionSet" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${local.name}wafSizeRestrictionSet"
+  name  = "${local.name}wafRegionalSizeRestrictionSet"
 
   size_constraints {
     text_transformation = "NONE"

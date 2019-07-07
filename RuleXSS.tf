@@ -88,8 +88,8 @@ resource "aws_wafregional_rule" "wafXSSRule" {
   count      = var.type == "regional" ? 1 : 0
   depends_on = [aws_wafregional_xss_match_set.wafXSSSet]
 
-  name        = "${local.name}wafXSSRule"
-  metric_name = "${local.name}wafXSSRule"
+  name        = "${local.name}wafRegionalXSSRule"
+  metric_name = "${local.name}wafRegionalXSSRule"
 
   predicate {
     data_id = aws_wafregional_xss_match_set.wafXSSSet[0].id
@@ -100,7 +100,7 @@ resource "aws_wafregional_rule" "wafXSSRule" {
 
 resource "aws_wafregional_xss_match_set" "wafXSSSet" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${local.name}wafXSSSet"
+  name  = "${local.name}wafRegionalXSSSet"
 
   xss_match_tuple {
     text_transformation = "URL_DECODE"

@@ -92,8 +92,8 @@ resource "aws_wafregional_rule" "wafServerSideIncludeRule" {
   count      = var.type == "regional" ? 1 : 0
   depends_on = [aws_wafregional_byte_match_set.wafServerSideIncludeStringSet]
 
-  name        = "${local.name}wafServerSideIncludeRule"
-  metric_name = "${local.name}wafServerSideIncludeRule"
+  name        = "${local.name}wafRegionalServerSideIncludeRule"
+  metric_name = "${local.name}wafRegionalServerSideIncludeRule"
 
   predicate {
     data_id = aws_wafregional_byte_match_set.wafServerSideIncludeStringSet[0].id
@@ -104,7 +104,7 @@ resource "aws_wafregional_rule" "wafServerSideIncludeRule" {
 
 resource "aws_wafregional_byte_match_set" "wafServerSideIncludeStringSet" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${local.name}wafServerSideIncludeStringSet"
+  name  = "${local.name}wafRegionalServerSideIncludeStringSet"
 
   byte_match_tuples {
     text_transformation   = "URL_DECODE"

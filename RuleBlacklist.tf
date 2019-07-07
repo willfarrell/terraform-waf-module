@@ -65,8 +65,8 @@ resource "aws_wafregional_rule" "wafBlacklistRule" {
     aws_wafregional_ipset.scanners-probes,
     aws_wafregional_ipset.reputation-list,
   ]
-  name        = "${local.name}wafBlacklistRule"
-  metric_name = "${local.name}wafBlacklistRule"
+  name        = "${local.name}wafRegionalBlacklistRule"
+  metric_name = "${local.name}wafRegionalBlacklistRule"
 
   predicate {
     data_id = aws_wafregional_ipset.blacklist[0].id
@@ -95,21 +95,21 @@ resource "aws_wafregional_rule" "wafBlacklistRule" {
 
 resource "aws_wafregional_ipset" "blacklist" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${var.name}-blacklist-ipset"
+  name  = "${var.name}-blacklist-regional-ipset"
 }
 
 resource "aws_wafregional_ipset" "bad-bot" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${var.name}-bad-bot-ipset"
+  name  = "${var.name}-bad-bot-regional-ipset"
 }
 
 resource "aws_wafregional_ipset" "scanners-probes" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${var.name}-scanners-probes-ipset"
+  name  = "${var.name}-scanners-probes-regional-ipset"
 }
 
 resource "aws_wafregional_ipset" "reputation-list" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${var.name}-reputation-list-ipset"
+  name  = "${var.name}-reputation-list-regional-ipset"
 }
 

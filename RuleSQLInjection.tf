@@ -108,8 +108,8 @@ resource "aws_wafregional_rule" "wafSQLInjectionRule" {
   count      = var.type == "regional" ? 1 : 0
   depends_on = [aws_wafregional_sql_injection_match_set.wafSQLInjectionRuleSet]
 
-  name        = "${local.name}wafSQLInjectionRule"
-  metric_name = "${local.name}wafSQLInjectionRule"
+  name        = "${local.name}wafRegionalSQLInjectionRule"
+  metric_name = "${local.name}wafRegionalSQLInjectionRule"
 
   predicate {
     data_id = aws_wafregional_sql_injection_match_set.wafSQLInjectionRuleSet[0].id
@@ -120,7 +120,7 @@ resource "aws_wafregional_rule" "wafSQLInjectionRule" {
 
 resource "aws_wafregional_sql_injection_match_set" "wafSQLInjectionRuleSet" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${local.name}wafSQLInjectionRuleSet"
+  name  = "${local.name}wafRegionalSQLInjectionRuleSet"
 
   sql_injection_match_tuple {
     text_transformation = "URL_DECODE"

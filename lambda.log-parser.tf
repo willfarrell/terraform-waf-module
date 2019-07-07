@@ -15,6 +15,7 @@ data "aws_iam_policy_document" "log-parser" {
 }
 
 resource "aws_iam_policy" "log-parser" {
+  name = "${local.name}-waf-log-parser-policy"
   policy = <<POLICY
 {
   "Version": "2012-10-17",

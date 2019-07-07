@@ -60,8 +60,8 @@ resource "aws_wafregional_rule" "wafCSRFRule" {
     aws_wafregional_size_constraint_set.wafCSRFTokenSizeConstraint,
   ]
 
-  name        = "${local.name}wafCSRFRule"
-  metric_name = "${local.name}wafCSRFRule"
+  name        = "${local.name}wafRegionalCSRFRule"
+  metric_name = "${local.name}wafRegionalCSRFRule"
 
   predicate {
     data_id = aws_wafregional_byte_match_set.wafCSRFMethodStringSet[0].id
@@ -78,7 +78,7 @@ resource "aws_wafregional_rule" "wafCSRFRule" {
 
 resource "aws_wafregional_byte_match_set" "wafCSRFMethodStringSet" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${local.name}wafCSRFMethodStringSet"
+  name  = "${local.name}wafRegionalCSRFMethodStringSet"
 
   byte_match_tuples {
     text_transformation   = "LOWERCASE"
@@ -93,7 +93,7 @@ resource "aws_wafregional_byte_match_set" "wafCSRFMethodStringSet" {
 
 resource "aws_wafregional_size_constraint_set" "wafCSRFTokenSizeConstraint" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${local.name}wafCSRFTokenSizeConstraint"
+  name  = "${local.name}wafRegionalCSRFTokenSizeConstraint"
 
   size_constraints {
     text_transformation = "NONE"

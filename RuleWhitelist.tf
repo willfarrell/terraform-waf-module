@@ -17,8 +17,8 @@ resource "aws_waf_ipset" "whitelist" {
 
 resource "aws_wafregional_rule" "wafWhitelistRule" {
   count       = var.type == "regional" ? 1 : 0
-  name        = "${local.name}wafWhitelistRule"
-  metric_name = "${local.name}wafWhitelistRule"
+  name        = "${local.name}wafRegionalWhitelistRule"
+  metric_name = "${local.name}wafRegionalWhitelistRule"
 
   predicate {
     data_id = var.ipWhitelistId != "" ? var.ipWhitelistId : aws_wafregional_ipset.whitelist[0].id
@@ -29,6 +29,6 @@ resource "aws_wafregional_rule" "wafWhitelistRule" {
 
 resource "aws_wafregional_ipset" "whitelist" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${var.name}-whitelist-ipset"
+  name  = "${var.name}-whitelist-regional-ipset"
 }
 

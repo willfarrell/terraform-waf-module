@@ -1,5 +1,5 @@
 output "id" {
-  value = (var.type == "regional" ? aws_wafregional_web_acl.wafrOwaspACL[0].id : aws_waf_web_acl.wafOwaspACL[0].id)
+  value = (var.type == "regional" ? aws_wafregional_web_acl.wafACL[0].id : aws_waf_web_acl.wafACL[0].id)
 }
 
 output "ipset_bad-bot_arn" {

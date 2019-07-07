@@ -48,8 +48,8 @@ resource "aws_wafregional_rule" "wafAuthTokenRule" {
   count      = var.type == "regional" ? 1 : 0
   depends_on = [aws_wafregional_byte_match_set.wafAuthTokenStringSet]
 
-  name        = "${local.name}wafAuthTokenRule"
-  metric_name = "${local.name}wafAuthTokenRule"
+  name        = "${local.name}wafRegionalAuthTokenRule"
+  metric_name = "${local.name}wafRegionalAuthTokenRule"
 
   predicate {
     data_id = aws_wafregional_byte_match_set.wafAuthTokenStringSet[0].id
@@ -60,7 +60,7 @@ resource "aws_wafregional_rule" "wafAuthTokenRule" {
 
 resource "aws_wafregional_byte_match_set" "wafAuthTokenStringSet" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${local.name}wafAuthTokenStringSet"
+  name  = "${local.name}wafRegionalAuthTokenStringSet"
 
   # TODO replace with real examples
   byte_match_tuples {

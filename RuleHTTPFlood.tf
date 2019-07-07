@@ -25,8 +25,8 @@ resource "aws_waf_ipset" "http-flood" {
 resource "aws_wafregional_rate_based_rule" "wafHTTPFloodRule" {
   count       = var.type == "regional" ? 1 : 0
   depends_on  = [aws_wafregional_ipset.http-flood]
-  name        = "${local.name}wafHTTPFloodRule"
-  metric_name = "wafHTTPFloodRule"
+  name        = "${local.name}wafRegionalHTTPFloodRule"
+  metric_name = "wafRegionalHTTPFloodRule"
 
   rate_key   = "IP"
   rate_limit = var.requestThreshold # per 5min
@@ -40,6 +40,6 @@ resource "aws_wafregional_rate_based_rule" "wafHTTPFloodRule" {
 
 resource "aws_wafregional_ipset" "http-flood" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${var.name}-http-flood-ipset"
+  name  = "${var.name}-http-flood-regional-ipset"
 }
 

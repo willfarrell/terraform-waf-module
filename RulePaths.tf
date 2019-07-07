@@ -102,8 +102,8 @@ resource "aws_wafregional_rule" "wafPathsRule" {
   count      = var.type == "regional" ? 1 : 0
   depends_on = [aws_waf_byte_match_set.wafPathsStringSet]
 
-  name        = "${local.name}wafPathsRule"
-  metric_name = "${local.name}wafPathsRule"
+  name        = "${local.name}wafRegionalPathsRule"
+  metric_name = "${local.name}wafRegionalPathsRule"
 
   predicate {
     data_id = aws_wafregional_byte_match_set.wafPathsStringSet[0].id
@@ -114,7 +114,7 @@ resource "aws_wafregional_rule" "wafPathsRule" {
 
 resource "aws_wafregional_byte_match_set" "wafPathsStringSet" {
   count = var.type == "regional" ? 1 : 0
-  name  = "${local.name}wafPathsStringSet"
+  name  = "${local.name}wafRegionalPathsStringSet"
 
   byte_match_tuples {
     text_transformation   = "URL_DECODE"
