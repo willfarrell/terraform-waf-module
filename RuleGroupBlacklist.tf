@@ -53,7 +53,7 @@ resource "aws_waf_rule_group" "wafBlacklistRuleGroup" {
 
     priority = 50
     rule_id  = aws_waf_rate_based_rule.wafHTTPFloodRule[0].id
-    type = "RATE_BASED"
+    type     = "RATE_BASED"
   }
 }
 
@@ -103,12 +103,12 @@ resource "aws_wafregional_rule_group" "wafBlacklistRuleGroup" {
   }
 
   // Terraform issue
-//  activated_rule {
-//    priority = 50
-//    rule_id  = aws_wafregional_rate_based_rule.wafHTTPFloodRule[0].id
-//    type = "RATE_BASED"
-//    action {
-//      type = "BLOCK"
-//    }
-//  }
+  //  activated_rule {
+  //    priority = 50
+  //    rule_id  = aws_wafregional_rate_based_rule.wafHTTPFloodRule[0].id
+  //    type = "RATE_BASED"
+  //    action {
+  //      type = "BLOCK"
+  //    }
+  //  }
 }

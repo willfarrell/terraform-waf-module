@@ -15,8 +15,8 @@ resource "aws_waf_web_acl" "wafACL" {
 
   rules {
     priority = 1
-    type = "GROUP"
-    rule_id = aws_waf_rule_group.wafBlacklistRuleGroup[0].id
+    type     = "GROUP"
+    rule_id  = aws_waf_rule_group.wafBlacklistRuleGroup[0].id
     override_action {
       type = "NONE"
     }
@@ -24,8 +24,8 @@ resource "aws_waf_web_acl" "wafACL" {
 
   rules {
     priority = 2
-    type = "GROUP"
-    rule_id = aws_waf_rule_group.wafOWASPRuleGroup[0].id
+    type     = "GROUP"
+    rule_id  = aws_waf_rule_group.wafOWASPRuleGroup[0].id
     override_action {
       type = "NONE"
     }
@@ -65,8 +65,8 @@ resource "aws_wafregional_web_acl" "wafACL" {
 
   rule {
     priority = 1
-    type = "GROUP"
-    rule_id = aws_wafregional_rule_group.wafBlacklistRuleGroup[0].id
+    type     = "GROUP"
+    rule_id  = aws_wafregional_rule_group.wafBlacklistRuleGroup[0].id
     override_action {
       type = "NONE"
     }
@@ -74,8 +74,8 @@ resource "aws_wafregional_web_acl" "wafACL" {
 
   rule {
     priority = 2
-    type = "GROUP"
-    rule_id = aws_wafregional_rule_group.wafOWASPRuleGroup[0].id
+    type     = "GROUP"
+    rule_id  = aws_wafregional_rule_group.wafOWASPRuleGroup[0].id
     override_action {
       type = "NONE"
     }
