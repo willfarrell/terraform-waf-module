@@ -5,8 +5,9 @@ To be used with CloudFront, ALB, API Gateway.
 
 ### Module
 ```hcl-terraform
-module "waf" {
-  source        = "git@github.com:willfarrell/terraform-waf-module?ref=v0.0.1"
+
+module "waf_cdn" {
+  source        = "git@github.com:willfarrell/terraform-waf-module?ref=v0.0.2"
   type          = "edge"
   name          = "${local.workspace["name"]}"
   defaultAction = "${var.defaultAction}"
@@ -14,10 +15,26 @@ module "waf" {
   ipAdminListId = "${aws_waf_ipset.admin.id}"
   ipWhiteListId = "${aws_waf_ipset.white.id}"
   
+  logging_bucket = "${local.workspace["name"]}-${local.workspace["env"]}-edge-logs"
+  
   providers = {
     aws = "aws.edge"
   }
 }
+
+module "waf_alb" {
+  source        = "git@github.com:willfarrell/terraform-waf-module?ref=v0.0.2"
+  type          = "regional"
+  name          = "${local.workspace["name"]}"
+  defaultAction = "${var.defaultAction}"
+
+  ipAdminListId = "${aws_wafregional_ipset.admin.id}"
+  ipWhiteListId = "${aws_wafregional_ipset.white.id}"
+  
+  logging_bucket = "${local.workspace["name"]}-${local.workspace["env"]}-${local.workspace["region"]}-logs"
+}
+
+
 resource "aws_ssm_parameter" "bad-bot" {
   name        = "/config/waf/ipset/bad-bot"
   description = "IP Set ID of the bad bot / honeypot blacklist"
