@@ -7,22 +7,12 @@ To be used with CloudFront, ALB, API Gateway.
 ```hcl-terraform
 module "waf" {
   source        = "git@github.com:willfarrell/terraform-waf-module?ref=v0.0.1"
-  type          = "regional"
+  type          = "edge"
   name          = "${local.workspace["name"]}"
   defaultAction = "${var.defaultAction}"
 
   ipAdminListId = "${aws_waf_ipset.admin.id}"
   ipWhiteListId = "${aws_waf_ipset.white.id}"
-  
-  rule_blacklist = true
-  rule_blacklist = true
-  rule_blacklist = true
-  rule_blacklist = true
-  rule_blacklist = true
-  rule_blacklist = true
-  rule_blacklist = true
-  rule_blacklist = true
-  rule_whitelist = true
   
   providers = {
     aws = "aws.edge"
