@@ -38,7 +38,7 @@ module "waf_alb" {
 resource "aws_ssm_parameter" "bad-bot" {
   name        = "/config/waf/ipset/bad-bot"
   description = "IP Set ID of the bad bot / honeypot blacklist"
-  type        = "SecureString"
+  type        = "String"
   value       = "${module.waf.ipset_bad-bot_id}"
 }
 
