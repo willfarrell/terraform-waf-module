@@ -57,10 +57,9 @@ resource "aws_wafregional_ipset" "white" {
 ```
 
 ## Input
-- **type:** Type of WAF. `regional` or `edge`. [Default: `edge`]
+- **scope:** Type of WAF. `REGIONAL` or `CLOUDFRONT`. [Default: `CLOUDFRONT`]
 - **name:** application name
 - **defaultAction:** Firewall permission. Set to `ALLOW` for the public to gain access [Default: DENY]
-- **ip{Admin,White}listId:** ip lists on who can and cannot access the endpoint [Default: empty ipset]
 
 See `variables.tf` for extended list of OWASP inputs that can be configured.
 
@@ -91,12 +90,7 @@ ACL
 
 ```
 
-
-## TODO
-- [ ] Easier ip list management 
-- [ ] Bug: terraform unable to att raterule to acl - add manually as workaround
-- [ ] Add in to toggle for each rule (max 10)
-
+For Classic WAF see `<=v0.0.4`.
 
 ## Sources
 - [AWS WAF Sample](https://github.com/awslabs/aws-waf-sample)

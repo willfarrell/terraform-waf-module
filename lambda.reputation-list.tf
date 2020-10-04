@@ -82,7 +82,7 @@ resource "aws_lambda_function" "reputation-list" {
   source_code_hash = filebase64sha256("${path.module}/lambda/reputation-list/archive.zip")
   role = aws_iam_role.reputation-list.arn
   handler = "index.handler"
-  runtime = "nodejs8.10"
+  runtime = "nodejs12.x"
   memory_size = 256
   timeout = 300
   publish = true
@@ -94,6 +94,11 @@ resource "aws_lambda_function" "reputation-list" {
       METRIC_NAME_PREFIX = "${local.name}-waf"
     }
   }
+}
+
+resource "aws_cloudwatch_log_group" "reputation-list" {
+  name              = "/aws/lambda/${local.name}-waf-reputation-list"
+  retention_in_days = 30
 }
 
 ## Event Trigger

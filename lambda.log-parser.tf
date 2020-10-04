@@ -123,6 +123,11 @@ resource "aws_lambda_function" "log-parser" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "log-parser" {
+  name              = "/aws/lambda/${local.name}-waf-log-parser"
+  retention_in_days = 30
+}
+
 resource "aws_lambda_permission" "log-parser" {
   statement_id = "AllowExecutionFromS3Bucket"
   action = "lambda:InvokeFunction"

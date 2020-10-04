@@ -1,12 +1,20 @@
 output "id" {
-  value = (var.type == "regional" ? aws_wafregional_web_acl.wafACL[0].id : aws_waf_web_acl.wafACL[0].id)
+  value = aws_wafv2_web_acl.wafACL.id
 }
 
-output "ipset_bad-bot_arn" {
-  value = (var.type == "regional" ? aws_wafregional_ipset.bad-bot[0].arn : aws_waf_ipset.bad-bot[0].arn)
+output "ipset_bad-bot-v4_arn" {
+  value = aws_wafv2_ip_set.IPBadBotSetIPV4.arn
+}
+output "ipset_bad-bot-v6_arn" {
+  value = aws_wafv2_ip_set.IPBadBotSetIPV6.arn
 }
 
-output "ipset_bad-bot_id" {
-  value = (var.type == "regional" ? aws_wafregional_ipset.bad-bot[0].id : aws_waf_ipset.bad-bot[0].id)
+output "ipset_bad-bot-v4_id" {
+  value = aws_wafv2_ip_set.IPBadBotSetIPV4.id
 }
+output "ipset_bad-bot-v6_id" {
+  value = aws_wafv2_ip_set.IPBadBotSetIPV6.id
+}
+
+
 
