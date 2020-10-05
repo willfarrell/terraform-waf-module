@@ -39,75 +39,87 @@ resource "aws_wafv2_web_acl" "main" {
     }
   }
 
-  rule {
-    name = "${local.name}wafWhitelistRule"
-    priority = 1
-    action {
-      allow {}
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafWhitelistRule"
-      sampled_requests_enabled = true
-    }
-    statement {
-      or_statement {
-        statement {
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.WhitelistSetV4.arn
-          }
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.WhitelistSetV6.arn
+  dynamic "rule" {
+    for_each = var.whitelistActivated ? [
+      true]: []
+    content {
+      name = "${local.name}wafWhitelistRule"
+      priority = 1
+      action {
+        allow {}
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name = "${local.name}wafWhitelistRule"
+        sampled_requests_enabled = true
+      }
+      statement {
+        or_statement {
+          statement {
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.WhitelistSetV4.arn
+            }
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.WhitelistSetV6.arn
+            }
           }
         }
       }
     }
   }
 
-  rule {
-    name = "${local.name}wafBlacklistRule"
-    priority = 2
-    action {
-      block {}
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafBlacklistRule"
-      sampled_requests_enabled = true
-    }
-    statement {
-      or_statement {
-        statement {
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.BlacklistSetIPV4.arn
-          }
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.BlacklistSetIPV6.arn
+  dynamic "rule" {
+    for_each = var.blacklistProtectionActivated ? [
+      true]: []
+    content {
+      name = "${local.name}wafBlacklistRule"
+      priority = 2
+      action {
+        block {}
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name = "${local.name}wafBlacklistRule"
+        sampled_requests_enabled = true
+      }
+      statement {
+        or_statement {
+          statement {
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.BlacklistSetIPV4.arn
+            }
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.BlacklistSetIPV6.arn
+            }
           }
         }
       }
     }
   }
 
-  rule {
-    name = "${local.name}wafHttpFloodRegularRule"
-    priority = 3
-    action {
-      block {}
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafHttpFloodRegularRule"
-      sampled_requests_enabled = true
-    }
-    statement {
-      or_statement {
-        statement {
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.HTTPFloodSetIPV4.arn
-          }
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.HTTPFloodSetIPV6.arn
+  dynamic "rule" {
+    for_each = var.httpFloodProtectionLogParserActivated ? [
+      true]: []
+    content {
+      name = "${local.name}wafHttpFloodRegularRule"
+      priority = 3
+      action {
+        block {}
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name = "${local.name}wafHttpFloodRegularRule"
+        sampled_requests_enabled = true
+      }
+      statement {
+        or_statement {
+          statement {
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.HTTPFloodSetIPV4.arn
+            }
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.HTTPFloodSetIPV6.arn
+            }
           }
         }
       }
@@ -133,75 +145,88 @@ resource "aws_wafv2_web_acl" "main" {
     }
   }
 
-  rule {
-    name = "${local.name}wafScannersAndProbesRule"
-    priority = 5
-    action {
-      block {}
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafScannersAndProbesRule"
-      sampled_requests_enabled = true
-    }
-    statement {
-      or_statement {
-        statement {
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.ScannersProbesSetIPV4.arn
-          }
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.ScannersProbesSetIPV6.arn
+
+  dynamic "rule" {
+    for_each = var.scannersProbesProtectionActivated ? [
+      true]: []
+    content {
+      name = "${local.name}wafScannersAndProbesRule"
+      priority = 5
+      action {
+        block {}
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name = "${local.name}wafScannersAndProbesRule"
+        sampled_requests_enabled = true
+      }
+      statement {
+        or_statement {
+          statement {
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.ScannersProbesSetIPV4.arn
+            }
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.ScannersProbesSetIPV6.arn
+            }
           }
         }
       }
     }
   }
 
-  rule {
-    name = "${local.name}wafIPReputationListsRule"
-    priority = 6
-    action {
-      block {}
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafIPReputationListsRule"
-      sampled_requests_enabled = true
-    }
-    statement {
-      or_statement {
-        statement {
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.IPReputationListsSetIPV4.arn
-          }
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.IPReputationListsSetIPV6.arn
+  dynamic "rule" {
+    for_each = var.reputationListsProtectionActivated ? [
+      true]: []
+    content {
+      name = "${local.name}wafIPReputationListsRule"
+      priority = 6
+      action {
+        block {}
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name = "${local.name}wafIPReputationListsRule"
+        sampled_requests_enabled = true
+      }
+      statement {
+        or_statement {
+          statement {
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.IPReputationListsSetIPV4.arn
+            }
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.IPReputationListsSetIPV6.arn
+            }
           }
         }
       }
     }
   }
 
-  rule {
-    name = "${local.name}wafBadBotRule"
-    priority = 7
-    action {
-      block {}
-    }
-    visibility_config {
-      sampled_requests_enabled = true
-      cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafBadBotRule"
-    }
-    statement {
-      or_statement {
-        statement {
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.IPBadBotSetIPV4.arn
-          }
-          ip_set_reference_statement {
-            arn = aws_wafv2_ip_set.IPBadBotSetIPV6.arn
+  dynamic "rule" {
+    for_each = var.badBotProtectionActivated ? [
+      true]: []
+    content {
+      name = "${local.name}wafBadBotRule"
+      priority = 7
+      action {
+        block {}
+      }
+      visibility_config {
+        sampled_requests_enabled = true
+        cloudwatch_metrics_enabled = true
+        metric_name = "${local.name}wafBadBotRule"
+      }
+      statement {
+        or_statement {
+          statement {
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.IPBadBotSetIPV4.arn
+            }
+            ip_set_reference_statement {
+              arn = aws_wafv2_ip_set.IPBadBotSetIPV6.arn
+            }
           }
         }
       }
@@ -366,14 +391,14 @@ resource "aws_wafv2_web_acl" "main" {
           }
         }
       }
-
     }
   }
 }
 
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
-  log_destination_configs = [aws_kinesis_firehose_delivery_stream.main.arn]
-  resource_arn            = aws_wafv2_web_acl.main.arn
+  log_destination_configs = [
+    aws_kinesis_firehose_delivery_stream.main.arn]
+  resource_arn = aws_wafv2_web_acl.main.arn
   redacted_fields {
     single_header {
       name = "authorizer"
@@ -388,13 +413,13 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "main" {
-  name        = "aws-waf-logs-${local.name}"
+  name = "aws-waf-logs-${local.name}"
   destination = "s3"
 
   s3_configuration {
-    role_arn   = aws_iam_role.logging.arn
+    role_arn = aws_iam_role.logging.arn
     bucket_arn = "arn:aws:s3:::${local.logging_bucket}"
-    prefix     = "/AWSLogs/${local.account_id}/WAF/${local.region}/"
+    prefix = "/AWSLogs/${local.account_id}/WAF/${local.region}/"
   }
 }
 
@@ -442,7 +467,7 @@ resource "aws_iam_policy" "logging" {
         "kinesis:GetRecords"
       ],
       "Resource": [
-        "${aws_kinesis_firehose_delivery_stream.logging.arn}"
+        "${aws_kinesis_firehose_delivery_stream.main.arn}"
       ],
       "Effect": "Allow"
     },
@@ -469,7 +494,7 @@ POLICY
 }
 
 resource "aws_iam_role_policy_attachment" "logging" {
-role       = aws_iam_role.logging.name
-policy_arn = aws_iam_policy.logging.arn
+  role = aws_iam_role.logging.name
+  policy_arn = aws_iam_policy.logging.arn
 }
 

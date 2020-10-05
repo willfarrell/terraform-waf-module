@@ -54,9 +54,12 @@ resource "aws_iam_policy" "log-parser" {
           "waf:UpdateIPSet"
       ],
       "Resource": [
-          "${var.type == "regional" ? aws_wafregional_ipset.blacklist[0].arn : aws_waf_ipset.blacklist[0].arn}",
-          "${var.type == "regional" ? aws_wafregional_ipset.http-flood[0].arn : aws_waf_ipset.http-flood[0].arn}",
-          "${var.type == "regional" ? aws_wafregional_ipset.scanners-probes[0].arn : aws_waf_ipset.scanners-probes[0].arn}"
+          "${aws_wafv2_ip_set.IPBadBotSetIPV4.arn}",
+          "${aws_wafv2_ip_set.IPBadBotSetIPV6.arn}",
+          "${aws_wafv2_ip_set.HTTPFloodSetIPV4.arn}",
+          "${aws_wafv2_ip_set.HTTPFloodSetIPV6.arn}",
+          "${aws_wafv2_ip_set.ScannersProbesSetIPV4.arn}",
+          "${aws_wafv2_ip_set.ScannersProbesSetIPV6.arn}"
       ],
       "Effect": "Allow"
     },
@@ -110,8 +113,8 @@ resource "aws_lambda_function" "log-parser" {
       STACK_NAME = local.name
       APP_ACCESS_LOG_BUCKET = local.logging_bucket
       WAF_ACCESS_LOG_BUCKET = local.logging_bucket
-      IP_SET_ID_HTTP_FLOOD = var.type == "regional" ? aws_wafregional_ipset.http-flood[0].id : aws_waf_ipset.http-flood[0].id
-      IP_SET_ID_SCANNERS_PROBES = var.type == "regional" ? aws_wafregional_ipset.scanners-probes[0].id : aws_waf_ipset.scanners-probes[0].id
+      IP_SET_ID_HTTP_FLOOD = aws_wafv2_ip_set.HTTPFloodSetIPV4.id
+      IP_SET_ID_SCANNERS_PROBES = aws_wafv2_ip_set.ScannersProbesSetIPV4.id
       LIMIT_IP_ADDRESS_RANGES_PER_IP_MATCH_CONDITION = 10000
       LOG_LEVEL = "INFO"
       LOG_TYPE = "cloudfront"

@@ -17,6 +17,18 @@ variable "requestThreshold" {
   default     = 100
 }
 
+variable "errorThreshold" {
+  description = "If you chose yes for the Activate Scanners & Probes Protection parameter, enter the maximum acceptable bad requests per minute per IP. If you chose to deactivate this protection protection, ignore this parameter."
+  type = number
+  default = 50
+}
+
+variable "blockPeriod" {
+  description = "If you chose yes for the Activate Scanners & Probes Protection or HTTP Flood Lambda/Athena log parser parameters, enter the period (in minutes) to block applicable IP addresses. If you chose to deactivate log parsing, ignore this parameter."
+  type        = number
+  default     = 240
+}
+
 variable "excluded_rules" {
   type = list(string)
   default = []
@@ -26,6 +38,36 @@ variable "excluded_rules" {
 //  type = list(map)
 //  default = []
 //}
+
+variable "whitelistActivated" {
+  type = bool
+  default = true
+}
+
+variable "blacklistProtectionActivated" {
+  type = bool
+  default = true
+}
+
+variable "httpFloodProtectionLogParserActivated" {
+  type = bool
+  default = true
+}
+
+variable "scannersProbesProtectionActivated" {
+  type = bool
+  default = true
+}
+
+variable "reputationListsProtectionActivated" {
+  type = bool
+  default = true
+}
+
+variable "badBotProtectionActivated" {
+  type = bool
+  default = true
+}
 
 variable "logging_bucket" {
   description = ""
