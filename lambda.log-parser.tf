@@ -208,7 +208,7 @@ resource "aws_s3_bucket_notification" "log-parser" {
     events = [
       "s3:ObjectCreated:*",
     ]
-    filter_prefix = "AWSLogs/${local.account_id}/CloudFront/*"
+    filter_prefix = "AWSLogs/${local.account_id}/CloudFront/"
     filter_suffix = ".gz"
   }
 
@@ -217,7 +217,7 @@ resource "aws_s3_bucket_notification" "log-parser" {
     events = [
       "s3:ObjectCreated:*",
     ]
-    filter_prefix = "AWSLogs/${local.account_id}/ALB/*"
+    filter_prefix = "AWSLogs/${local.account_id}/ALB/"
     filter_suffix = ".gz"
   }
 
@@ -226,7 +226,7 @@ resource "aws_s3_bucket_notification" "log-parser" {
     events = [
       "s3:ObjectCreated:*",
     ]
-    filter_prefix = "AWSLogs/${local.account_id}/WAF/*"
+    filter_prefix = "AWSLogs/${local.account_id}/WAF/"
     filter_suffix = ".gz"
   }
 }
@@ -245,8 +245,27 @@ resource "aws_sns_topic_policy" "log-parser" {
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "Default",
       "Effect": "Allow",
-      "Principal": {"Service":"s3.amazonaws.com"},
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": [
+        "sns:Publish",
+        "sns:RemovePermission",
+        "sns:SetTopicAttributes",
+        "sns:DeleteTopic",
+        "sns:ListSubscriptionsByTopic",
+        "sns:GetTopicAttributes",
+        "sns:Receive",
+        "sns:AddPermission",
+        "sns:Subscribe"
+      ],
+      "Resource": "${aws_sns_topic.log-parser.arn}"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {"AWS":"*"},
       "Action": "sns:Publish",
       "Resource": "${aws_sns_topic.log-parser.arn}",
       "Condition": {
