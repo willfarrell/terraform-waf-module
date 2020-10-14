@@ -10,7 +10,8 @@ resource "aws_wafv2_web_acl" "main" {
   }
 
   default_action {
-    type = var.defaultAction
+    allow {}
+    // find way to connect ot var.defaultAction
   }
 
   rule {
@@ -59,6 +60,8 @@ resource "aws_wafv2_web_acl" "main" {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.WhitelistSetV4.arn
             }
+          }
+          statement {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.WhitelistSetV6.arn
             }
@@ -88,6 +91,8 @@ resource "aws_wafv2_web_acl" "main" {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.BlacklistSetIPV4.arn
             }
+          }
+          statement {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.BlacklistSetIPV6.arn
             }
@@ -117,6 +122,8 @@ resource "aws_wafv2_web_acl" "main" {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.HTTPFloodSetIPV4.arn
             }
+          }
+          statement {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.HTTPFloodSetIPV6.arn
             }
@@ -166,6 +173,8 @@ resource "aws_wafv2_web_acl" "main" {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.ScannersProbesSetIPV4.arn
             }
+          }
+          statement {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.ScannersProbesSetIPV6.arn
             }
@@ -195,6 +204,8 @@ resource "aws_wafv2_web_acl" "main" {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.IPReputationListsSetIPV4.arn
             }
+          }
+          statement {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.IPReputationListsSetIPV6.arn
             }
@@ -224,6 +235,8 @@ resource "aws_wafv2_web_acl" "main" {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.IPBadBotSetIPV4.arn
             }
+          }
+          statement {
             ip_set_reference_statement {
               arn = aws_wafv2_ip_set.IPBadBotSetIPV6.arn
             }
@@ -260,6 +273,8 @@ resource "aws_wafv2_web_acl" "main" {
               type = "HTML_ENTITY_DECODE"
             }
           }
+        }
+        statement {
           sqli_match_statement {
             field_to_match {
               body {}
@@ -273,6 +288,8 @@ resource "aws_wafv2_web_acl" "main" {
               type = "HTML_ENTITY_DECODE"
             }
           }
+        }
+        statement {
           sqli_match_statement {
             field_to_match {
               uri_path {}
@@ -286,10 +303,12 @@ resource "aws_wafv2_web_acl" "main" {
               type = "HTML_ENTITY_DECODE"
             }
           }
+        }
+        statement {
           sqli_match_statement {
             field_to_match {
               single_header {
-                name = "Authorization"
+                name = "authorization"
               }
             }
             text_transformation {
@@ -301,10 +320,12 @@ resource "aws_wafv2_web_acl" "main" {
               type = "HTML_ENTITY_DECODE"
             }
           }
+        }
+        statement {
           sqli_match_statement {
             field_to_match {
               single_header {
-                name = "Cookie"
+                name = "cookie"
               }
             }
             text_transformation {
@@ -347,6 +368,8 @@ resource "aws_wafv2_web_acl" "main" {
               type = "HTML_ENTITY_DECODE"
             }
           }
+        }
+        statement {
           xss_match_statement {
             field_to_match {
               body {}
@@ -360,6 +383,8 @@ resource "aws_wafv2_web_acl" "main" {
               type = "HTML_ENTITY_DECODE"
             }
           }
+        }
+        statement {
           xss_match_statement {
             field_to_match {
               uri_path {}
@@ -373,11 +398,12 @@ resource "aws_wafv2_web_acl" "main" {
               type = "HTML_ENTITY_DECODE"
             }
           }
-
+        }
+        statement {
           xss_match_statement {
             field_to_match {
               single_header {
-                name = "Cookie"
+                name = "cookie"
               }
             }
             text_transformation {
@@ -399,13 +425,18 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
   log_destination_configs = [
     aws_kinesis_firehose_delivery_stream.main.arn]
   resource_arn = aws_wafv2_web_acl.main.arn
+
   redacted_fields {
     single_header {
       name = "authorizer"
     }
+  }
+  redacted_fields {
     single_header {
       name = "cookie"
     }
+  }
+  redacted_fields {
     single_header {
       name = "user-agent"
     }
@@ -419,7 +450,7 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
   s3_configuration {
     role_arn = aws_iam_role.logging.arn
     bucket_arn = "arn:aws:s3:::${local.logging_bucket}"
-    prefix = "/AWSLogs/${local.account_id}/WAF/${local.region}/"
+    prefix = "AWSLogs/${local.account_id}/WAF/${local.region}/"
   }
 }
 

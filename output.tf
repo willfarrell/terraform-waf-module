@@ -1,5 +1,5 @@
 output "id" {
-  value = aws_wafv2_web_acl.wafACL.id
+  value = aws_wafv2_web_acl.main.arn
 }
 
 output "ipset_bad-bot-v4_arn" {

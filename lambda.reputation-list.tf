@@ -1,4 +1,5 @@
 data "aws_iam_policy_document" "reputation-list" {
+  count = var.reputationListsProtectionActivated ? 1 : 0
   statement {
     actions = [
       "sts:AssumeRole",
@@ -14,22 +15,21 @@ data "aws_iam_policy_document" "reputation-list" {
   }
 }
 
+/*
+The wrong arn is returned for IPsets
+Expected: arn:aws:wafv2:us-east-1:{account_id}:global/ipset/{ip_set_id}/{ip_set_id}
+Actual: arn:aws:wafv2:us-east-1:{account_id}:global/ipset/{ip_set_name}/{ip_set_id}
+
+*/
 resource "aws_iam_policy" "reputation-list" {
+  count = var.reputationListsProtectionActivated ? 1 : 0
   name   = "${local.name}-waf-reputation-list-policy"
   policy = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid":"CloudWatchAccess",
-      "Action": "cloudwatch:GetMetricStatistics",
-      "Resource": [
-        "*"
-      ],
-      "Effect": "Allow"
-    },
-    {
-      "Sid":"CloudWatchLogAccess",
+      "Sid":"CloudWatchLogs",
       "Action": [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
@@ -43,8 +43,8 @@ resource "aws_iam_policy" "reputation-list" {
     {
       "Sid":"WAFGetAndUpdateIPSet",
       "Action": [
-          "waf:GetIPSet",
-          "waf:UpdateIPSet"
+          "wafv2:GetIPSet",
+          "wafv2:UpdateIPSet"
       ],
       "Resource": [
           "${aws_wafv2_ip_set.IPReputationListsSetIPV4.arn}",
@@ -53,8 +53,8 @@ resource "aws_iam_policy" "reputation-list" {
       "Effect": "Allow"
     },
     {
-      "Sid":"WAFGetChangeToken",
-      "Action": "waf:GetChangeToken",
+      "Sid":"CloudWatchAccess",
+      "Action": "cloudwatch:GetMetricStatistics",
       "Resource": [
         "*"
       ],
@@ -63,74 +63,75 @@ resource "aws_iam_policy" "reputation-list" {
   ]
 }
 POLICY
-
 }
 
 resource "aws_iam_role" "reputation-list" {
+  count = var.reputationListsProtectionActivated ? 1 : 0
   name = "${local.name}-waf-reputation-list"
-  assume_role_policy = data.aws_iam_policy_document.reputation-list.json
+  assume_role_policy = data.aws_iam_policy_document.reputation-list[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "reputation-list" {
-  role = aws_iam_role.reputation-list.name
-  policy_arn = aws_iam_policy.reputation-list.arn
+  count = var.reputationListsProtectionActivated ? 1 : 0
+  role = aws_iam_role.reputation-list[0].name
+  policy_arn = aws_iam_policy.reputation-list[0].arn
 }
 
 resource "aws_lambda_function" "reputation-list" {
+  count = var.reputationListsProtectionActivated ? 1 : 0
   function_name = "${local.name}-waf-reputation-list"
-  filename = "${path.module}/lambda/reputation-list/archive.zip"
+  filename = "${path.module}/lambda/reputation_lists_parser.zip"
 
-  source_code_hash = filebase64sha256("${path.module}/lambda/reputation-list/archive.zip")
-  role = aws_iam_role.reputation-list.arn
-  handler = "index.handler"
-  runtime = "nodejs12.x"
-  memory_size = 256
+  source_code_hash = filebase64sha256("${path.module}/lambda/reputation_lists_parser.zip")
+  role = aws_iam_role.reputation-list[0].arn
+  handler = "reputation-lists.lambda_handler"
+  runtime = "python3.8"
+  memory_size = 512
   timeout = 300
   publish = true
   environment {
     variables = {
-      API_TYPE = "waf"
-      # waf, waf-regional
+      STACK_NAME = local.name
+      SCOPE = var.scope
+      IP_SET_NAME_REPUTATIONV4 = "${var.name}-IPReputationListsSetIPV4"
+      IP_SET_NAME_REPUTATIONV6 = "${var.name}-IPReputationListsSetIPV6"
+      IP_SET_ID_REPUTATIONV4 = aws_wafv2_ip_set.IPReputationListsSetIPV4.arn
+      IP_SET_ID_REPUTATIONV6 = aws_wafv2_ip_set.IPReputationListsSetIPV6.arn
+      LOG_TYPE = "cloudfront"
       LOG_LEVEL = "INFO"
+      IPREPUTATIONLIST_METRICNAME = "IPReputationList"
       METRIC_NAME_PREFIX = "${local.name}-waf"
+      URL_LIST: "[{\"url\":\"https://www.spamhaus.org/drop/drop.txt\"},{\"url\":\"https://www.spamhaus.org/drop/edrop.txt\"},{\"url\":\"https://check.torproject.org/exit-addresses\", \"prefix\":\"ExitAddress\"},{\"url\":\"https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt\"}]"
     }
   }
 }
 
 resource "aws_cloudwatch_log_group" "reputation-list" {
+  count = var.reputationListsProtectionActivated ? 1 : 0
   name              = "/aws/lambda/${local.name}-waf-reputation-list"
   retention_in_days = 30
 }
 
 ## Event Trigger
 resource "aws_cloudwatch_event_rule" "reputation-list" {
+  count = var.reputationListsProtectionActivated ? 1 : 0
   name = "${local.name}-waf-reputation-list-event"
   description = "hourly"
   schedule_expression = "rate(1 hour)"
 }
 
 resource "aws_cloudwatch_event_target" "reputation-list" {
-  rule = aws_cloudwatch_event_rule.reputation-list.name
-  arn = aws_lambda_function.reputation-list.arn
-  input = <<JSON
-{
-  "lists": [
-    { "url":"https://www.spamhaus.org/drop/drop.txt" },
-    { "url":"https://www.spamhaus.org/drop/edrop.txt" },
-    { "url":"https://check.torproject.org/exit-addresses", "prefix":"ExitAddress"},
-    {  "url":"https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt" }
-  ],
-  "region": "${local.region}",
-  "ipSetIds": [ "${aws_wafv2_ip_set.IPReputationListsSetIPV4.id}","${aws_wafv2_ip_set.IPReputationListsSetIPV6.id}" ]
-}
-JSON
+  count = var.reputationListsProtectionActivated ? 1 : 0
+  rule = aws_cloudwatch_event_rule.reputation-list[0].name
+  arn = aws_lambda_function.reputation-list[0].arn
 }
 
 resource "aws_lambda_permission" "reputation-list" {
+  count = var.reputationListsProtectionActivated ? 1 : 0
   statement_id  = "${local.name}-waf-reputation-list-event"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.reputation-list.function_name
+  function_name = aws_lambda_function.reputation-list[0].function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.reputation-list.arn
+  source_arn    = aws_cloudwatch_event_rule.reputation-list[0].arn
 }
 

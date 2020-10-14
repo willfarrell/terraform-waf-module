@@ -8,7 +8,7 @@ variable "scope" {
 }
 
 variable "defaultAction" {
-  default = "DENY"
+  default = "block"
 }
 
 variable "requestThreshold" {
