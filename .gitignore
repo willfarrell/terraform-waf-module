@@ -9,7 +9,7 @@
 *.tfvars
 
 *.zip
-!lambda/reputation-list/archive.zip
+!lambda/*.zip
 
 # nodejs
 node_modules

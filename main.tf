@@ -72,6 +72,121 @@ resource "aws_wafv2_web_acl" "main" {
   }
 
   dynamic "rule" {
+    for_each = var.blacklistProtectionActivated || var.httpFloodProtectionLogParserActivated || var.scannersProbesProtectionActivated || var.reputationListsProtectionActivated || var.badBotProtectionActivated ? [
+      true]: []
+    content {
+      name = "${local.name}wafBlacklistRule"
+      priority = 2
+      action {
+        block {}
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name = "${local.name}wafBlacklistRule"
+        sampled_requests_enabled = true
+      }
+      statement {
+        or_statement {
+          dynamic "statement" {
+            for_each = var.blacklistProtectionActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.BlacklistSetIPV4.arn
+              }
+            }
+          }
+          dynamic "statement" {
+            for_each = var.blacklistProtectionActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.BlacklistSetIPV6.arn
+              }
+            }
+          }
+
+          dynamic "statement" {
+            for_each = var.httpFloodProtectionLogParserActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.HTTPFloodSetIPV4.arn
+              }
+            }
+          }
+          dynamic "statement" {
+            for_each = var.scannersProbesProtectionActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.HTTPFloodSetIPV6.arn
+              }
+            }
+          }
+
+          dynamic "statement" {
+            for_each = var.scannersProbesProtectionActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.ScannersProbesSetIPV4.arn
+              }
+            }
+          }
+          dynamic "statement" {
+            for_each = var.httpFloodProtectionLogParserActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.ScannersProbesSetIPV6.arn
+              }
+            }
+          }
+
+          dynamic "statement" {
+            for_each = var.reputationListsProtectionActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.IPReputationListsSetIPV4.arn
+              }
+            }
+          }
+          dynamic "statement" {
+            for_each = var.reputationListsProtectionActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.IPReputationListsSetIPV6.arn
+              }
+            }
+          }
+
+          dynamic "statement" {
+            for_each = var.badBotProtectionActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.IPBadBotSetIPV4.arn
+              }
+            }
+          }
+          dynamic "statement" {
+            for_each = var.badBotProtectionActivated ? [
+              true]: []
+            content {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.IPBadBotSetIPV6.arn
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /*dynamic "rule" {
     for_each = var.blacklistProtectionActivated ? [
       true]: []
     content {
@@ -100,9 +215,9 @@ resource "aws_wafv2_web_acl" "main" {
         }
       }
     }
-  }
+  }*/
 
-  dynamic "rule" {
+  /*dynamic "rule" {
     for_each = var.httpFloodProtectionLogParserActivated ? [
       true]: []
     content {
@@ -131,7 +246,7 @@ resource "aws_wafv2_web_acl" "main" {
         }
       }
     }
-  }
+  }*/
 
   rule {
     name = "${local.name}wafHttpFloodRateBasedRule"
@@ -153,7 +268,7 @@ resource "aws_wafv2_web_acl" "main" {
   }
 
 
-  dynamic "rule" {
+  /*dynamic "rule" {
     for_each = var.scannersProbesProtectionActivated ? [
       true]: []
     content {
@@ -182,9 +297,9 @@ resource "aws_wafv2_web_acl" "main" {
         }
       }
     }
-  }
+  }*/
 
-  dynamic "rule" {
+  /*dynamic "rule" {
     for_each = var.reputationListsProtectionActivated ? [
       true]: []
     content {
@@ -213,9 +328,9 @@ resource "aws_wafv2_web_acl" "main" {
         }
       }
     }
-  }
+  }*/
 
-  dynamic "rule" {
+  /*dynamic "rule" {
     for_each = var.badBotProtectionActivated ? [
       true]: []
     content {
@@ -244,7 +359,7 @@ resource "aws_wafv2_web_acl" "main" {
         }
       }
     }
-  }
+  }*/
 
   rule {
     name = "${local.name}wafSqlInjectionRule"

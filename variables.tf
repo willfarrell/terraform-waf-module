@@ -14,7 +14,7 @@ variable "defaultAction" {
 variable "requestThreshold" {
   description = "If you chose yes for the Activate HTTP Flood Protection parameter, enter the maximum acceptable requests per FIVE-minute period per IP address. Please note that AWS WAF rate based rule requires values greather than 2,000 (if you chose Lambda/Athena log parser options, you can use any value greather than zero). If you chose to deactivate this protection, ignore this parameter. Default to `2000`, min allowed: `2000`"
   type        = number
-  default     = 100
+  default     = 2000
 }
 
 variable "errorThreshold" {

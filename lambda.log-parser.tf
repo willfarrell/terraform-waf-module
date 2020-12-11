@@ -1,3 +1,6 @@
+// TODO update to use athena - https://docs.aws.amazon.com/athena/latest/ug/partitions.html
+
+
 data "aws_iam_policy_document" "log-parser" {
   statement {
     actions = [
@@ -150,6 +153,7 @@ resource "aws_iam_role_policy_attachment" "http-flood" {
   policy_arn = aws_iam_policy.http-flood[0].arn
 }
 
+// TODO move lambda inside VPC
 resource "aws_lambda_function" "log-parser" {
   function_name = "${local.name}-waf-log-parser"
   filename = "${path.module}/lambda/log_parser.zip"

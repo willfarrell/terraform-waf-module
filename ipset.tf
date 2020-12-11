@@ -6,6 +6,9 @@ resource "aws_wafv2_ip_set" "WhitelistSetV4" {
   scope = var.scope
   ip_address_version = "IPV4"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "BlacklistSetIPV4" {
@@ -14,6 +17,9 @@ resource "aws_wafv2_ip_set" "BlacklistSetIPV4" {
   scope = var.scope
   ip_address_version = "IPV4"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "HTTPFloodSetIPV4" {
@@ -22,6 +28,9 @@ resource "aws_wafv2_ip_set" "HTTPFloodSetIPV4" {
   scope = var.scope
   ip_address_version = "IPV4"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "ScannersProbesSetIPV4" {
@@ -30,6 +39,9 @@ resource "aws_wafv2_ip_set" "ScannersProbesSetIPV4" {
   scope = var.scope
   ip_address_version = "IPV4"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "IPReputationListsSetIPV4" {
@@ -38,6 +50,9 @@ resource "aws_wafv2_ip_set" "IPReputationListsSetIPV4" {
   scope = var.scope
   ip_address_version = "IPV4"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "IPBadBotSetIPV4" {
@@ -46,6 +61,9 @@ resource "aws_wafv2_ip_set" "IPBadBotSetIPV4" {
   scope = var.scope
   ip_address_version = "IPV4"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 # IPv6
@@ -55,6 +73,9 @@ resource "aws_wafv2_ip_set" "WhitelistSetV6" {
   scope = var.scope
   ip_address_version = "IPV6"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "BlacklistSetIPV6" {
@@ -63,6 +84,9 @@ resource "aws_wafv2_ip_set" "BlacklistSetIPV6" {
   scope = var.scope
   ip_address_version = "IPV6"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "HTTPFloodSetIPV6" {
@@ -71,6 +95,9 @@ resource "aws_wafv2_ip_set" "HTTPFloodSetIPV6" {
   scope = var.scope
   ip_address_version = "IPV6"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "ScannersProbesSetIPV6" {
@@ -79,6 +106,9 @@ resource "aws_wafv2_ip_set" "ScannersProbesSetIPV6" {
   scope = var.scope
   ip_address_version = "IPV6"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "IPReputationListsSetIPV6" {
@@ -87,6 +117,9 @@ resource "aws_wafv2_ip_set" "IPReputationListsSetIPV6" {
   scope = var.scope
   ip_address_version = "IPV6"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
 
 resource "aws_wafv2_ip_set" "IPBadBotSetIPV6" {
@@ -95,4 +128,7 @@ resource "aws_wafv2_ip_set" "IPBadBotSetIPV6" {
   scope = var.scope
   ip_address_version = "IPV6"
   addresses = []
+  lifecycle {
+    ignore_changes = [addresses]
+  }
 }
