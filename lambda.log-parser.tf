@@ -42,6 +42,20 @@ resource "aws_iam_policy" "log-parser" {
         "*"
       ],
       "Effect": "Allow"
+    },
+    {
+      "Sid":"Decrypt",
+      "Effect":"Allow",
+      "Action":[
+        "kms:Decrypt"
+      ],
+      "Resource":["arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/${var.kms_master_key_id != null ? var.kms_master_key_id : ""}"]
+    },
+    {
+      "Sid":"DLQ",
+      "Effect":"Allow",
+      "Action":["sns:Publish","sqs:SendMessage"],
+      "Resource":"${var.dead_letter_arn}"
     }
   ]
 }
@@ -153,7 +167,6 @@ resource "aws_iam_role_policy_attachment" "http-flood" {
   policy_arn = aws_iam_policy.http-flood[0].arn
 }
 
-// TODO move lambda inside VPC
 resource "aws_lambda_function" "log-parser" {
   function_name = "${local.name}-waf-log-parser"
   filename = "${path.module}/lambda/log_parser.zip"
@@ -161,10 +174,19 @@ resource "aws_lambda_function" "log-parser" {
   source_code_hash = filebase64sha256("${path.module}/lambda/log_parser.zip")
   role = aws_iam_role.log-parser.arn
   handler = "log-parser.lambda_handler"
-  runtime = "python3.8"
+  runtime = "python3.9"
   memory_size = 512
   timeout = 300
   publish = true
+
+  dead_letter_config {
+    target_arn = var.dead_letter_arn
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
+
   environment {
     variables = {
       STACK_NAME = local.name
@@ -235,11 +257,9 @@ resource "aws_s3_bucket_notification" "log-parser" {
   }
 }
 
-// TODO make SNS encrypted
-// TODO test lambda parses event properly **
 resource "aws_sns_topic" "log-parser" {
   name = "${local.name}-waf-log-parser-topic"
-  #kms_master_key_id = "alias/aws/sns"
+  kms_master_key_id = var.kms_master_key_id
 }
 
 resource "aws_sns_topic_policy" "log-parser" {
@@ -249,31 +269,14 @@ resource "aws_sns_topic_policy" "log-parser" {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "Default",
       "Effect": "Allow",
-      "Principal": {
-        "AWS": "*"
-      },
-      "Action": [
-        "sns:Publish",
-        "sns:RemovePermission",
-        "sns:SetTopicAttributes",
-        "sns:DeleteTopic",
-        "sns:ListSubscriptionsByTopic",
-        "sns:GetTopicAttributes",
-        "sns:Receive",
-        "sns:AddPermission",
-        "sns:Subscribe"
-      ],
-      "Resource": "${aws_sns_topic.log-parser.arn}"
-    },
-    {
-      "Effect": "Allow",
-      "Principal": {"AWS":"*"},
+      "Principal": {"Service":"s3.amazonaws.com"},
       "Action": "sns:Publish",
       "Resource": "${aws_sns_topic.log-parser.arn}",
       "Condition": {
-        "ArnEquals": { "aws:SourceArn": "${local.logging_bucket}" }
+        "ArnEquals": {
+          "AWS:SourceArn": "${local.logging_bucket}"
+        }
       }
     }
   ]

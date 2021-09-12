@@ -74,3 +74,12 @@ variable "logging_bucket" {
   default     = ""
 }
 
+variable "dead_letter_arn" {
+  type = string
+}
+
+variable "kms_master_key_id" {
+  type = string
+  default = null
+}
+

@@ -59,6 +59,12 @@ resource "aws_iam_policy" "reputation-list" {
         "*"
       ],
       "Effect": "Allow"
+    },
+    {
+      "Sid":"DLQ",
+      "Effect":"Allow",
+      "Action":["sns:Publish","sqs:SendMessage"],
+      "Resource":"${var.dead_letter_arn}"
     }
   ]
 }
@@ -85,10 +91,19 @@ resource "aws_lambda_function" "reputation-list" {
   source_code_hash = filebase64sha256("${path.module}/lambda/reputation_lists_parser.zip")
   role = aws_iam_role.reputation-list[0].arn
   handler = "reputation-lists.lambda_handler"
-  runtime = "python3.8"
+  runtime = "python3.9"
   memory_size = 512
   timeout = 300
   publish = true
+
+  dead_letter_config {
+    target_arn = var.dead_letter_arn
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
+
   environment {
     variables = {
       STACK_NAME = local.name
