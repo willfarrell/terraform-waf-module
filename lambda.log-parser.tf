@@ -49,13 +49,7 @@ resource "aws_iam_policy" "log-parser" {
       "Action":[
         "kms:Decrypt"
       ],
-      "Resource":["arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/${var.kms_master_key_id != null ? var.kms_master_key_id : ""}"]
-    },
-    {
-      "Sid":"DLQ",
-      "Effect":"Allow",
-      "Action":["sns:Publish","sqs:SendMessage"],
-      "Resource":"${var.dead_letter_arn}"
+      "Resource":["arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/${var.kms_master_key_id}"]
     }
   ]
 }
@@ -66,6 +60,11 @@ POLICY
 resource "aws_iam_role" "log-parser" {
   name = "${local.name}-waf-log-parser"
   assume_role_policy = data.aws_iam_policy_document.log-parser.json
+}
+
+resource "aws_iam_role_policy_attachment" "log-parser-dlq" {
+  role = aws_iam_role.log-parser.name
+  policy_arn = var.dead_letter_policy_arn
 }
 
 resource "aws_iam_role_policy_attachment" "log-parser" {
@@ -291,7 +290,7 @@ resource "aws_sns_topic_subscription" "log-parser" {
 }
 
 # TODO don't update file if already exists
-resource "aws_s3_bucket_object" "app-log-parser" {
+resource "aws_s3_object" "app-log-parser" {
   bucket = local.logging_bucket
   key = "/${local.name}-app_log_conf.json"
   content = <<JSON
@@ -307,7 +306,7 @@ JSON
 
 }
 
-resource "aws_s3_bucket_object" "waf-log-parser" {
+resource "aws_s3_object" "waf-log-parser" {
 bucket  = local.logging_bucket
 key     = "/${local.name}-waf_log_conf.json"
 content = <<JSON

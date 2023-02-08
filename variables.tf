@@ -69,12 +69,22 @@ variable "badBotProtectionActivated" {
   default = true
 }
 
+variable "SqlInjectionProtectionSensitivityLevelParam" {
+  type = string
+  description = "Sensitivity Level for SQL Injection Protection. LOW or HIGH"
+  default = "LOW"
+}
+
 variable "logging_bucket" {
   description = ""
   default     = ""
 }
 
 variable "dead_letter_arn" {
+  type = string
+}
+
+variable "dead_letter_policy_arn" {
   type = string
 }
 

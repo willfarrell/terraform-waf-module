@@ -59,12 +59,6 @@ resource "aws_iam_policy" "reputation-list" {
         "*"
       ],
       "Effect": "Allow"
-    },
-    {
-      "Sid":"DLQ",
-      "Effect":"Allow",
-      "Action":["sns:Publish","sqs:SendMessage"],
-      "Resource":"${var.dead_letter_arn}"
     }
   ]
 }
@@ -81,6 +75,12 @@ resource "aws_iam_role_policy_attachment" "reputation-list" {
   count = var.reputationListsProtectionActivated ? 1 : 0
   role = aws_iam_role.reputation-list[0].name
   policy_arn = aws_iam_policy.reputation-list[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "reputation-list-dlq" {
+  count = var.reputationListsProtectionActivated ? 1 : 0
+  role = aws_iam_role.reputation-list[0].name
+  policy_arn = var.dead_letter_policy_arn
 }
 
 resource "aws_lambda_function" "reputation-list" {

@@ -1,4 +1,5 @@
 # Source: https://github.com/awslabs/aws-waf-security-automations/blob/master/deployment/aws-waf-security-automations-webacl.template
+# https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-changelog.html
 resource "aws_wafv2_web_acl" "main" {
   name = "${local.name}wafACL"
   scope = var.scope
@@ -29,11 +30,16 @@ resource "aws_wafv2_web_acl" "main" {
       managed_rule_group_statement {
         name = "AWSManagedRulesCommonRuleSet"
         vendor_name = "AWS"
-        // Rules: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
-        dynamic "excluded_rule" {
+        version = "Version_1.4"
+        # Rules: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
+        # Changelog: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-changelog.html
+        dynamic "rule_action_override" {
           for_each = var.excluded_rules
           content {
-            name = excluded_rule.value
+            name = rule_action_override.value
+            action_to_use {
+              count {}
+            }
           }
         }
       }
@@ -387,12 +393,15 @@ resource "aws_wafv2_web_acl" "main" {
               priority = 2
               type = "HTML_ENTITY_DECODE"
             }
+            #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
         }
         statement {
           sqli_match_statement {
             field_to_match {
-              body {}
+              body {
+                oversize_handling = "CONTINUE"
+              }
             }
             text_transformation {
               priority = 1
@@ -402,6 +411,30 @@ resource "aws_wafv2_web_acl" "main" {
               priority = 2
               type = "HTML_ENTITY_DECODE"
             }
+            #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
+          }
+        }
+        statement {
+          sqli_match_statement {
+            field_to_match {
+              json_body {
+                invalid_fallback_behavior = "EVALUATE_AS_STRING"
+                match_pattern {
+                  all {}
+                }
+                match_scope = "ALL"
+                oversize_handling = "CONTINUE"
+              }
+            }
+            text_transformation {
+              priority = 1
+              type = "URL_DECODE"
+            }
+            text_transformation {
+              priority = 2
+              type = "HTML_ENTITY_DECODE"
+            }
+            #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
         }
         statement {
@@ -417,13 +450,14 @@ resource "aws_wafv2_web_acl" "main" {
               priority = 2
               type = "HTML_ENTITY_DECODE"
             }
+            #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
         }
         statement {
           sqli_match_statement {
             field_to_match {
               single_header {
-                name = "authorization"
+                name = "authorization" # Must be lowercase
               }
             }
             text_transformation {
@@ -434,13 +468,14 @@ resource "aws_wafv2_web_acl" "main" {
               priority = 2
               type = "HTML_ENTITY_DECODE"
             }
+            #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
         }
         statement {
           sqli_match_statement {
             field_to_match {
               single_header {
-                name = "cookie"
+                name = "cookie" # Must be lowercase
               }
             }
             text_transformation {
@@ -451,6 +486,7 @@ resource "aws_wafv2_web_acl" "main" {
               priority = 2
               type = "HTML_ENTITY_DECODE"
             }
+            #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
         }
       }
@@ -487,7 +523,31 @@ resource "aws_wafv2_web_acl" "main" {
         statement {
           xss_match_statement {
             field_to_match {
-              body {}
+              body {
+                oversize_handling = "CONTINUE"
+              }
+            }
+            text_transformation {
+              priority = 1
+              type = "URL_DECODE"
+            }
+            text_transformation {
+              priority = 2
+              type = "HTML_ENTITY_DECODE"
+            }
+          }
+        }
+        statement {
+          xss_match_statement {
+            field_to_match {
+              json_body {
+                invalid_fallback_behavior = "EVALUATE_AS_STRING"
+                match_pattern {
+                  all {}
+                }
+                match_scope = "ALL"
+                oversize_handling = "CONTINUE"
+              }
             }
             text_transformation {
               priority = 1
