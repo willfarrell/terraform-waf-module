@@ -212,7 +212,7 @@ resource "aws_lambda_function" "log-parser" {
 
 resource "aws_cloudwatch_log_group" "log-parser" {
   name              = "/aws/lambda/${local.name}-waf-log-parser"
-  retention_in_days = 30
+  retention_in_days = terraform.workspace == "production" ? 365 : 7
 }
 
 //resource "aws_lambda_permission" "log-parser" {

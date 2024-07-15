@@ -620,9 +620,9 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
 
 resource "aws_kinesis_firehose_delivery_stream" "main" {
   name = "aws-waf-logs-${local.name}"
-  destination = "s3"
+  destination = "extended_s3"
 
-  s3_configuration {
+  extended_s3_configuration {
     role_arn = aws_iam_role.logging.arn
     bucket_arn = "arn:aws:s3:::${local.logging_bucket}"
     prefix = "AWSLogs/${local.account_id}/WAF/${local.region}/"

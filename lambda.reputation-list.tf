@@ -124,7 +124,7 @@ resource "aws_lambda_function" "reputation-list" {
 resource "aws_cloudwatch_log_group" "reputation-list" {
   count = var.reputationListsProtectionActivated ? 1 : 0
   name              = "/aws/lambda/${local.name}-waf-reputation-list"
-  retention_in_days = 30
+  retention_in_days = terraform.workspace == "production" ? 365 : 7
 }
 
 ## Event Trigger
