@@ -14,10 +14,42 @@ resource "aws_wafv2_web_acl" "main" {
     allow {}
     // find way to connect ot var.defaultAction
   }
-
+  
+  dynamic "rule" {
+    for_each = var.uploadToS3Activated ? [
+      true]: []
+    content {
+      name = "${local.name}wafUploadToS3Rule"
+      priority = 0
+      action {
+        allow {}
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name = "${local.name}wafUploadToS3Rule"
+        sampled_requests_enabled = true
+      }
+      statement {
+        #scope_down_statement {
+          byte_match_statement {
+            field_to_match {
+              uri_path {}
+            }
+            positional_constraint = "EXACTLY"
+            search_string = "/upload"
+            text_transformation {
+              priority = 0
+              type = "NONE"
+            }
+          }
+        #}
+      }
+    }
+  }
+  
   rule {
     name = "${local.name}wafAWSManagedRulesCommonRuleSet"
-    priority = 0
+    priority = 1
     override_action {
       none {}
     }
@@ -45,13 +77,15 @@ resource "aws_wafv2_web_acl" "main" {
       }
     }
   }
+  
+  # TODO AWSManagedRulesACFPRuleSet https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl
 
   dynamic "rule" {
     for_each = var.whitelistActivated ? [
       true]: []
     content {
       name = "${local.name}wafWhitelistRule"
-      priority = 1
+      priority = 3
       action {
         allow {}
       }
@@ -82,7 +116,7 @@ resource "aws_wafv2_web_acl" "main" {
       true]: []
     content {
       name = "${local.name}wafBlacklistRule"
-      priority = 2
+      priority = 4
       action {
         block {}
       }
@@ -256,7 +290,7 @@ resource "aws_wafv2_web_acl" "main" {
 
   rule {
     name = "${local.name}wafHttpFloodRateBasedRule"
-    priority = 4
+    priority = 5
     action {
       block {}
     }

@@ -39,9 +39,20 @@ variable "excluded_rules" {
 //  default = []
 //}
 
+variable "uploadToS3Activated" {
+  type = bool
+  default = false
+}
+
+variable "uploadToS3Path" {
+  type = string
+  description = "path that upload will take place"
+  default = ""
+}
+
 variable "whitelistActivated" {
   type = bool
-  default = true
+  default = false
 }
 
 variable "blacklistProtectionActivated" {
