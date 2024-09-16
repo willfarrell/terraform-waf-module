@@ -661,6 +661,12 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
     bucket_arn = "arn:aws:s3:::${local.logging_bucket}"
     prefix = "AWSLogs/${local.account_id}/WAF/${local.region}/"
   }
+  
+  server_side_encryption {
+    enabled  = true
+    key_type = "CUSTOMER_MANAGED_CMK"
+    key_arn  = var.kms_master_key_arn
+  }
 }
 
 resource "aws_iam_role" "logging" {

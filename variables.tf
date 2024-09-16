@@ -103,4 +103,8 @@ variable "kms_master_key_id" {
   type = string
   default = null
 }
+variable "kms_master_key_arn" {
+  type = string
+  default = null
+}
 
