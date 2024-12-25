@@ -259,6 +259,7 @@ resource "aws_s3_bucket_notification" "log-parser" {
 resource "aws_sns_topic" "log-parser" {
   name = "${local.name}-waf-log-parser-topic"
   kms_master_key_id = var.kms_master_key_id
+  signature_version                        = 2
 }
 
 resource "aws_sns_topic_policy" "log-parser" {
