@@ -1,68 +1,68 @@
 # Source: https://github.com/awslabs/aws-waf-security-automations/blob/master/deployment/aws-waf-security-automations-webacl.template
 # https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-changelog.html
 resource "aws_wafv2_web_acl" "main" {
-  name = "${local.name}wafACL"
+  name  = "${local.name}wafACL"
   scope = var.scope
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    sampled_requests_enabled = true
-    metric_name = "${local.name}wafACL"
+    sampled_requests_enabled   = true
+    metric_name                = "${local.name}wafACL"
   }
 
   default_action {
     allow {}
     // find way to connect ot var.defaultAction
   }
-  
+
   dynamic "rule" {
     for_each = var.uploadToS3Activated ? [
-      true]: []
+    true] : []
     content {
-      name = "${local.name}wafUploadToS3Rule"
+      name     = "${local.name}wafUploadToS3Rule"
       priority = 0
       action {
         allow {}
       }
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name = "${local.name}wafUploadToS3Rule"
-        sampled_requests_enabled = true
+        metric_name                = "${local.name}wafUploadToS3Rule"
+        sampled_requests_enabled   = true
       }
       statement {
         #scope_down_statement {
-          byte_match_statement {
-            field_to_match {
-              uri_path {}
-            }
-            positional_constraint = "EXACTLY"
-            search_string = "/upload"
-            text_transformation {
-              priority = 0
-              type = "NONE"
-            }
+        byte_match_statement {
+          field_to_match {
+            uri_path {}
           }
+          positional_constraint = "EXACTLY"
+          search_string         = "/upload"
+          text_transformation {
+            priority = 0
+            type     = "NONE"
+          }
+        }
         #}
       }
     }
   }
-  
+
   rule {
-    name = "${local.name}wafAWSManagedRulesCommonRuleSet"
+    name     = "${local.name}wafAWSManagedRulesCommonRuleSet"
     priority = 1
     override_action {
       none {}
     }
     visibility_config {
       cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafAWSManagedRulesCommonRuleSet"
-      sampled_requests_enabled = true
+      metric_name                = "${local.name}wafAWSManagedRulesCommonRuleSet"
+      sampled_requests_enabled   = true
     }
     statement {
       managed_rule_group_statement {
-        name = "AWSManagedRulesCommonRuleSet"
+        name        = "AWSManagedRulesCommonRuleSet"
         vendor_name = "AWS"
-        version = "Version_1.4"
+        version     = "Version_1.4"
         # Rules: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
         # Changelog: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-changelog.html
         dynamic "rule_action_override" {
@@ -77,22 +77,22 @@ resource "aws_wafv2_web_acl" "main" {
       }
     }
   }
-  
+
   # TODO AWSManagedRulesACFPRuleSet https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl
 
   dynamic "rule" {
     for_each = var.whitelistActivated ? [
-      true]: []
+    true] : []
     content {
-      name = "${local.name}wafWhitelistRule"
+      name     = "${local.name}wafWhitelistRule"
       priority = 3
       action {
         allow {}
       }
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name = "${local.name}wafWhitelistRule"
-        sampled_requests_enabled = true
+        metric_name                = "${local.name}wafWhitelistRule"
+        sampled_requests_enabled   = true
       }
       statement {
         or_statement {
@@ -113,23 +113,23 @@ resource "aws_wafv2_web_acl" "main" {
 
   dynamic "rule" {
     for_each = var.blacklistProtectionActivated || var.httpFloodProtectionLogParserActivated || var.scannersProbesProtectionActivated || var.reputationListsProtectionActivated || var.badBotProtectionActivated ? [
-      true]: []
+    true] : []
     content {
-      name = "${local.name}wafBlacklistRule"
+      name     = "${local.name}wafBlacklistRule"
       priority = 4
       action {
         block {}
       }
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name = "${local.name}wafBlacklistRule"
-        sampled_requests_enabled = true
+        metric_name                = "${local.name}wafBlacklistRule"
+        sampled_requests_enabled   = true
       }
       statement {
         or_statement {
           dynamic "statement" {
             for_each = var.blacklistProtectionActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.BlacklistSetIPV4.arn
@@ -138,7 +138,7 @@ resource "aws_wafv2_web_acl" "main" {
           }
           dynamic "statement" {
             for_each = var.blacklistProtectionActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.BlacklistSetIPV6.arn
@@ -148,7 +148,7 @@ resource "aws_wafv2_web_acl" "main" {
 
           dynamic "statement" {
             for_each = var.httpFloodProtectionLogParserActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.HTTPFloodSetIPV4.arn
@@ -157,7 +157,7 @@ resource "aws_wafv2_web_acl" "main" {
           }
           dynamic "statement" {
             for_each = var.scannersProbesProtectionActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.HTTPFloodSetIPV6.arn
@@ -167,7 +167,7 @@ resource "aws_wafv2_web_acl" "main" {
 
           dynamic "statement" {
             for_each = var.scannersProbesProtectionActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.ScannersProbesSetIPV4.arn
@@ -176,7 +176,7 @@ resource "aws_wafv2_web_acl" "main" {
           }
           dynamic "statement" {
             for_each = var.httpFloodProtectionLogParserActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.ScannersProbesSetIPV6.arn
@@ -186,7 +186,7 @@ resource "aws_wafv2_web_acl" "main" {
 
           dynamic "statement" {
             for_each = var.reputationListsProtectionActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.IPReputationListsSetIPV4.arn
@@ -195,7 +195,7 @@ resource "aws_wafv2_web_acl" "main" {
           }
           dynamic "statement" {
             for_each = var.reputationListsProtectionActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.IPReputationListsSetIPV6.arn
@@ -205,7 +205,7 @@ resource "aws_wafv2_web_acl" "main" {
 
           dynamic "statement" {
             for_each = var.badBotProtectionActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.IPBadBotSetIPV4.arn
@@ -214,7 +214,7 @@ resource "aws_wafv2_web_acl" "main" {
           }
           dynamic "statement" {
             for_each = var.badBotProtectionActivated ? [
-              true]: []
+            true] : []
             content {
               ip_set_reference_statement {
                 arn = aws_wafv2_ip_set.IPBadBotSetIPV6.arn
@@ -288,21 +288,37 @@ resource "aws_wafv2_web_acl" "main" {
     }
   }*/
 
+  custom_response_body {
+    key          = "RateLimitJsonBody"
+    content_type = "APPLICATION_JSON"
+    content = jsonencode({
+      error   = "Too Many Requests"
+      message = "You have exceeded the rate limit. Please try again later."
+      status  = 429
+    })
+  }
+
   rule {
-    name = "${local.name}wafHttpFloodRateBasedRule"
+    name     = "${local.name}wafHttpFloodRateBasedRule"
     priority = 5
     action {
-      block {}
+      block {
+        custom_response {
+          response_code            = 429
+          custom_response_body_key = "RateLimitJsonBody"
+        }
+      }
     }
+
     visibility_config {
       cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafHttpFloodRateBasedRule"
-      sampled_requests_enabled = true
+      metric_name                = "${local.name}wafHttpFloodRateBasedRule"
+      sampled_requests_enabled   = true
     }
     statement {
       rate_based_statement {
         aggregate_key_type = "IP"
-        limit = var.requestThreshold
+        limit              = var.requestThreshold
       }
     }
   }
@@ -402,15 +418,15 @@ resource "aws_wafv2_web_acl" "main" {
   }*/
 
   rule {
-    name = "${local.name}wafSqlInjectionRule"
+    name     = "${local.name}wafSqlInjectionRule"
     priority = 20
     action {
       block {}
     }
     visibility_config {
-      sampled_requests_enabled = true
+      sampled_requests_enabled   = true
       cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafSqlInjectionRule"
+      metric_name                = "${local.name}wafSqlInjectionRule"
     }
     statement {
       or_statement {
@@ -421,11 +437,11 @@ resource "aws_wafv2_web_acl" "main" {
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
             #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
@@ -439,11 +455,11 @@ resource "aws_wafv2_web_acl" "main" {
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
             #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
@@ -456,17 +472,17 @@ resource "aws_wafv2_web_acl" "main" {
                 match_pattern {
                   all {}
                 }
-                match_scope = "ALL"
+                match_scope       = "ALL"
                 oversize_handling = "CONTINUE"
               }
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
             #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
@@ -478,11 +494,11 @@ resource "aws_wafv2_web_acl" "main" {
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
             #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
@@ -496,11 +512,11 @@ resource "aws_wafv2_web_acl" "main" {
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
             #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
@@ -514,11 +530,11 @@ resource "aws_wafv2_web_acl" "main" {
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
             #sensitivity_level = var.SqlInjectionProtectionSensitivityLevelParam
           }
@@ -527,15 +543,15 @@ resource "aws_wafv2_web_acl" "main" {
     }
   }
   rule {
-    name = "${local.name}wafXssRule"
+    name     = "${local.name}wafXssRule"
     priority = 30
     action {
       block {}
     }
     visibility_config {
-      sampled_requests_enabled = true
+      sampled_requests_enabled   = true
       cloudwatch_metrics_enabled = true
-      metric_name = "${local.name}wafXssRule"
+      metric_name                = "${local.name}wafXssRule"
     }
     statement {
       or_statement {
@@ -546,11 +562,11 @@ resource "aws_wafv2_web_acl" "main" {
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
           }
         }
@@ -563,11 +579,11 @@ resource "aws_wafv2_web_acl" "main" {
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
           }
         }
@@ -579,17 +595,17 @@ resource "aws_wafv2_web_acl" "main" {
                 match_pattern {
                   all {}
                 }
-                match_scope = "ALL"
+                match_scope       = "ALL"
                 oversize_handling = "CONTINUE"
               }
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
           }
         }
@@ -600,11 +616,11 @@ resource "aws_wafv2_web_acl" "main" {
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
           }
         }
@@ -617,11 +633,11 @@ resource "aws_wafv2_web_acl" "main" {
             }
             text_transformation {
               priority = 1
-              type = "URL_DECODE"
+              type     = "URL_DECODE"
             }
             text_transformation {
               priority = 2
-              type = "HTML_ENTITY_DECODE"
+              type     = "HTML_ENTITY_DECODE"
             }
           }
         }
@@ -632,7 +648,7 @@ resource "aws_wafv2_web_acl" "main" {
 
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
   log_destination_configs = [
-    aws_kinesis_firehose_delivery_stream.main.arn]
+  aws_kinesis_firehose_delivery_stream.main.arn]
   resource_arn = aws_wafv2_web_acl.main.arn
 
   redacted_fields {
@@ -653,15 +669,15 @@ resource "aws_wafv2_web_acl_logging_configuration" "main" {
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "main" {
-  name = "aws-waf-logs-${local.name}"
+  name        = "aws-waf-logs-${local.name}"
   destination = "extended_s3"
 
   extended_s3_configuration {
-    role_arn = aws_iam_role.logging.arn
+    role_arn   = aws_iam_role.logging.arn
     bucket_arn = "arn:aws:s3:::${local.logging_bucket}"
-    prefix = "AWSLogs/${local.account_id}/WAF/${local.region}/"
+    prefix     = "AWSLogs/${local.account_id}/WAF/${local.region}/"
   }
-  
+
   server_side_encryption {
     enabled  = true
     key_type = "CUSTOMER_MANAGED_CMK"
@@ -740,7 +756,7 @@ POLICY
 }
 
 resource "aws_iam_role_policy_attachment" "logging" {
-  role = aws_iam_role.logging.name
+  role       = aws_iam_role.logging.name
   policy_arn = aws_iam_policy.logging.arn
 }
 
