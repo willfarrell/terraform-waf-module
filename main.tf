@@ -648,7 +648,8 @@ resource "aws_wafv2_web_acl" "main" {
 
 resource "aws_wafv2_web_acl_logging_configuration" "main" {
   log_destination_configs = [
-  aws_kinesis_firehose_delivery_stream.main.arn]
+    aws_kinesis_firehose_delivery_stream.main.arn
+  ]
   resource_arn = aws_wafv2_web_acl.main.arn
 
   redacted_fields {
@@ -673,11 +674,17 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
   destination = "extended_s3"
 
   extended_s3_configuration {
-    role_arn   = aws_iam_role.logging.arn
-    bucket_arn = "arn:aws:s3:::${local.logging_bucket}"
-    prefix     = "AWSLogs/${local.account_id}/WAF/${local.region}/"
-  }
+    role_arn    = aws_iam_role.logging.arn
+    bucket_arn  = "arn:aws:s3:::${local.logging_bucket}"
+    prefix      = "AWSLogs/${local.account_id}/WAF/${local.region}/"
+    kms_key_arn = var.kms_master_key_arn  # Remove to use bucket's default encryption
 
+    cloudwatch_logging_options {
+      enabled         = true
+      log_group_name  = aws_cloudwatch_log_group.logging.name
+      log_stream_name = aws_cloudwatch_log_stream.logging.name
+    }
+  }
   server_side_encryption {
     enabled  = true
     key_type = "CUSTOMER_MANAGED_CMK"
@@ -685,74 +692,92 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
   }
 }
 
-resource "aws_iam_role" "logging" {
-  name = "${local.name}-waf-stream-role"
+data "aws_iam_policy_document" "logging_assume_role_policy" {
+  statement {
+    effect = "Allow"
+    actions = ["sts:AssumeRole"]
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "firehose.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
+    principals {
+      type = "Service"
+      identifiers = ["firehose.amazonaws.com"]
     }
-  ]
-}
-EOF
 
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values = [local.account_id]
+    }
+  }
+}
+
+resource "aws_iam_role" "logging" {
+  name               = "${local.name}-waf-stream-role"
+  assume_role_policy = data.aws_iam_policy_document.logging_assume_role_policy.json
+}
+
+data "aws_iam_policy_document" "logging" {
+  statement {
+    sid    = "CloudWatchAccess"
+    effect = "Allow"
+    actions = [
+      "logs:PutLogEvents"
+    ]
+    resources = [
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:${aws_cloudwatch_log_group.logging.name}:*"
+    ]
+  }
+
+  statement {
+    sid    = "KinesisAccess"
+    effect = "Allow"
+    actions = [
+      "kinesis:DescribeStream",
+      "kinesis:GetShardIterator",
+      "kinesis:GetRecords"
+    ]
+    resources = [
+      aws_kinesis_firehose_delivery_stream.main.arn
+    ]
+  }
+
+  statement {
+    sid    = "S3Access"
+    effect = "Allow"
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject"
+    ]
+    resources = [
+      "arn:aws:s3:::${local.logging_bucket}",
+      "arn:aws:s3:::${local.logging_bucket}/*"
+    ]
+  }
+
+  statement {
+    sid    = "KMSAccess"
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey"
+    ]
+    resources = [var.kms_master_key_arn]
+    condition {
+      test = "StringLike"
+      values = [
+        "arn:aws:s3:::${local.logging_bucket}/*"
+      ]
+      variable = "kms:EncryptionContext:aws:s3:arn"
+    }
+  }
 }
 
 resource "aws_iam_policy" "logging" {
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid":"CloudWatchAccess",
-      "Action": [
-        "logs:PutLogEvents"
-      ],
-      "Resource": [
-        "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/kinesisfirehose/${local.name}-waf-stream:*"
-      ],
-      "Effect": "Allow"
-    },
-    {
-      "Sid":"KinesisAccess",
-      "Action": [
-        "kinesis:DescribeStream",
-        "kinesis:GetShardIterator",
-        "kinesis:GetRecords"
-      ],
-      "Resource": [
-        "${aws_kinesis_firehose_delivery_stream.main.arn}"
-      ],
-      "Effect": "Allow"
-    },
-    {
-      "Sid":"S3Access",
-      "Action": [
-        "s3:AbortMultipartUpload",
-        "s3:GetBucketLocation",
-        "s3:GetObject",
-        "s3:ListBucket",
-        "s3:ListBucketMultipartUploads",
-        "s3:PutObject"
-      ],
-      "Resource": [
-        "arn:aws:s3:::${local.logging_bucket}",
-        "arn:aws:s3:::${local.logging_bucket}/*"
-      ],
-      "Effect": "Allow"
-    }
-  ]
-}
-POLICY
-
+  name   = "${local.name}-waf-stream-logging-policy"
+  policy = data.aws_iam_policy_document.logging.json
 }
 
 resource "aws_iam_role_policy_attachment" "logging" {
@@ -760,3 +785,12 @@ resource "aws_iam_role_policy_attachment" "logging" {
   policy_arn = aws_iam_policy.logging.arn
 }
 
+resource "aws_cloudwatch_log_group" "logging" {
+  name              = "/aws/kinesisfirehose/${local.name}-waf-stream"
+  retention_in_days = terraform.workspace == "production" ? 365 : 7
+}
+
+resource "aws_cloudwatch_log_stream" "logging" {
+  name           = "/aws/kinesisfirehose/${local.name}-waf-stream-error-logs"
+  log_group_name = aws_cloudwatch_log_group.logging.name
+}
