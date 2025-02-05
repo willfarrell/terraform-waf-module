@@ -50,6 +50,12 @@ variable "uploadToS3Path" {
   default = ""
 }
 
+variable "uploadToS3Method" {
+  type = string
+  description = "method that upload will use"
+  default = "PUT"
+}
+
 variable "whitelistActivated" {
   type = bool
   default = false

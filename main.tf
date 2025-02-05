@@ -30,19 +30,36 @@ resource "aws_wafv2_web_acl" "main" {
         sampled_requests_enabled   = true
       }
       statement {
-        #scope_down_statement {
-        byte_match_statement {
-          field_to_match {
-            uri_path {}
+        and_statement {
+          statement {
+            byte_match_statement {
+              field_to_match {
+                uri_path {}
+              }
+              positional_constraint = "STARTS_WITH"
+              search_string         = var.uploadToS3Path
+              text_transformation {
+                priority = 0
+                type     = "NONE"
+              }
+            }
           }
-          positional_constraint = "EXACTLY"
-          search_string         = "/upload"
-          text_transformation {
-            priority = 0
-            type     = "NONE"
+
+          statement {
+            byte_match_statement {
+              field_to_match {
+                method {}
+              }
+
+              positional_constraint = "EXACTLY"
+              search_string         = var.uploadToS3Method
+              text_transformation {
+                priority = 0
+                type     = "NONE"
+              }
+            }
           }
         }
-        #}
       }
     }
   }
