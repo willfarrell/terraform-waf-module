@@ -1,133 +1,66 @@
 
-# IPv4
-resource "aws_wafv2_ip_set" "WhitelistSetV4" {
-  name  = "${var.name}-WhitelistSetV4"
-  description = "Allow whitelist for IPV4 addresses"
-  scope = var.scope
+# Terraform owns the allow and block lists: they are configuration.
+resource "aws_wafv2_ip_set" "allow_v4" {
+  name               = "${local.name}-allow-v4"
+  description        = "Addresses exempt from every rule"
+  scope              = var.scope
   ip_address_version = "IPV4"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
+  addresses          = var.allow_ipv4
+  tags               = var.tags
 }
 
-resource "aws_wafv2_ip_set" "BlacklistSetIPV4" {
-  name  = "${var.name}-BlacklistSetIPV4"
-  description = "Block blacklist for IPV4 addresses"
-  scope = var.scope
+resource "aws_wafv2_ip_set" "allow_v6" {
+  name               = "${local.name}-allow-v6"
+  description        = "Addresses exempt from every rule"
+  scope              = var.scope
+  ip_address_version = "IPV6"
+  addresses          = var.allow_ipv6
+  tags               = var.tags
+}
+
+resource "aws_wafv2_ip_set" "block_v4" {
+  name               = "${local.name}-block-v4"
+  description        = "Addresses blocked outright"
+  scope              = var.scope
   ip_address_version = "IPV4"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
+  addresses          = var.block_ipv4
+  tags               = var.tags
 }
 
-resource "aws_wafv2_ip_set" "HTTPFloodSetIPV4" {
-  name  = "${var.name}-HTTPFloodSetIPV4"
-  description = "Block HTTP Flood IPV4 addresses"
-  scope = var.scope
+resource "aws_wafv2_ip_set" "block_v6" {
+  name               = "${local.name}-block-v6"
+  description        = "Addresses blocked outright"
+  scope              = var.scope
+  ip_address_version = "IPV6"
+  addresses          = var.block_ipv6
+  tags               = var.tags
+}
+
+# An external writer owns these: a honeypot, an abuse job, an operator script.
+# Terraform creates them empty and never reconciles their contents.
+# ponytail: no expiry. AWS caps an IP set at 10,000 addresses and nothing here
+# ages entries out, so a writer that never removes anything eventually wedges.
+# Upgrade path is a scheduled job that prunes by age, which needs its own store
+# because a WAF IP set carries no per-entry timestamp.
+resource "aws_wafv2_ip_set" "bot_v4" {
+  name               = "${local.name}-bot-v4"
+  description        = "Bad bot addresses, written outside Terraform"
+  scope              = var.scope
   ip_address_version = "IPV4"
-  addresses = []
+  addresses          = []
+  tags               = var.tags
   lifecycle {
     ignore_changes = [addresses]
   }
 }
 
-resource "aws_wafv2_ip_set" "ScannersProbesSetIPV4" {
-  name  = "${var.name}-ScannersProbesSetIPV4"
-  description = "Block Scanners/Probes IPV4 addresses"
-  scope = var.scope
-  ip_address_version = "IPV4"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
-}
-
-resource "aws_wafv2_ip_set" "IPReputationListsSetIPV4" {
-  name  = "${var.name}-IPReputationListsSetIPV4"
-  description = "Block Reputation List IPV4 addresses"
-  scope = var.scope
-  ip_address_version = "IPV4"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
-}
-
-resource "aws_wafv2_ip_set" "IPBadBotSetIPV4" {
-  name  = "${var.name}-IPBadBotSetIPV4"
-  description = "Block Bad Bot IPV4 addresses"
-  scope = var.scope
-  ip_address_version = "IPV4"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
-}
-
-# IPv6
-resource "aws_wafv2_ip_set" "WhitelistSetV6" {
-  name  = "${var.name}-WhitelistSetV6"
-  description = "Allow whitelist for IPV6 addresses"
-  scope = var.scope
+resource "aws_wafv2_ip_set" "bot_v6" {
+  name               = "${local.name}-bot-v6"
+  description        = "Bad bot addresses, written outside Terraform"
+  scope              = var.scope
   ip_address_version = "IPV6"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
-}
-
-resource "aws_wafv2_ip_set" "BlacklistSetIPV6" {
-  name  = "${var.name}-BlacklistSetIPV6"
-  description = "Block blacklist for IPV6 addresses"
-  scope = var.scope
-  ip_address_version = "IPV6"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
-}
-
-resource "aws_wafv2_ip_set" "HTTPFloodSetIPV6" {
-  name  = "${var.name}-HTTPFloodSetIPV6"
-  description = "Block HTTP Flood IPV6 addresses"
-  scope = var.scope
-  ip_address_version = "IPV6"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
-}
-
-resource "aws_wafv2_ip_set" "ScannersProbesSetIPV6" {
-  name  = "${var.name}-ScannersProbesSetIPV6"
-  description = "Block Scanners/Probes IPV6 addresses"
-  scope = var.scope
-  ip_address_version = "IPV6"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
-}
-
-resource "aws_wafv2_ip_set" "IPReputationListsSetIPV6" {
-  name  = "${var.name}-IPReputationListsSetIPV6"
-  description = "Block Reputation List IPV6 addresses"
-  scope = var.scope
-  ip_address_version = "IPV6"
-  addresses = []
-  lifecycle {
-    ignore_changes = [addresses]
-  }
-}
-
-resource "aws_wafv2_ip_set" "IPBadBotSetIPV6" {
-  name  = "${var.name}-IPBadBotSetIPV6"
-  description = "Block Bad Bot IPV6 addresses"
-  scope = var.scope
-  ip_address_version = "IPV6"
-  addresses = []
+  addresses          = []
+  tags               = var.tags
   lifecycle {
     ignore_changes = [addresses]
   }
